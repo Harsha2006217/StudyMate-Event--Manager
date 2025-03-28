@@ -1,0 +1,158 @@
+/* Algemene styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh; /* Zorgt voor volledige hoogte */
+}
+
+/* Navbar en Footer */
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff; /* Witte tekst voor contrast */
+}
+
+.navbar-nav .nav-link.active {
+    color: #28a745; /* Groen voor actieve link */
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #343a40;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+/* Main content */
+section {
+    padding-bottom: 80px; /* Ruimte voor vaste footer */
+}
+
+/* Evenementen in kalender */
+.event {
+    padding: 6px 12px;
+    margin: 5px 0;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9rem;
+    display: block;
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+
+.event:hover {
+    transform: scale(1.03);
+    opacity: 0.9;
+}
+
+/* Categoriekleuren */
+.school { background-color: #dc3545; }
+.sociaal { background-color: #28a745; }
+.gaming { background-color: #007bff; }
+
+/* Toevoegen van een evenement: visuele feedback */
+.add-event {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.add-event h2 {
+    color: #28a745; /* Groen voor titel */
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+
+.add-event form {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.add-event .form-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.add-event .form-control,
+.add-event .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.add-event .form-control:focus,
+.add-event .form-select:focus {
+    border-color: #28a745; /* Groene rand bij focus */
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+    outline: none;
+}
+
+.add-event .btn-success {
+    background-color: #28a745; /* Groen voor opslaan */
+    border-color: #28a745;
+    font-weight: bold;
+    padding: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-event .btn-success:hover {
+    background-color: #218838; /* Donkerder groen bij hover */
+    border-color: #1e7e34;
+    transform: scale(1.02);
+}
+
+.add-event .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    padding: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-event .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    transform: scale(1.02);
+}
+
+/* Animaties */
+section {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsieve aanpassingen */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+    .add-event {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+    .add-event form {
+        padding: 15px;
+    }
+    .event {
+        font-size: 0.85rem;
+        padding: 4px 8px;
+    }
+    footer {
+        font-size: 0.9rem;
+    }
+}
