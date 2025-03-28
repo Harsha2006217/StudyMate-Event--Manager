@@ -2,7 +2,6 @@
 require_once 'functions.php';
 requireLogin();
 
-// Array met categorieën (datastructuur)
 $categories = ['school' => 'School', 'sociaal' => 'Sociaal', 'gaming' => 'Gaming'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reminder = isset($_POST['reminder']) ? 1 : 0;
     $reminder_time = $reminder ? $_POST['reminder_time'] : null;
 
-    // Validatie met flow control
     if (empty($title)) {
         $error = "Titel is verplicht.";
     } elseif (strtotime($date) < strtotime(date('Y-m-d'))) {
@@ -23,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $stmt = $pdo->prepare("INSERT INTO events (user_id, title, date, time, category, reminder, reminder_time) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$_SESSION['user_id'], $title, $date, $time, $category, $reminder, $reminder_time]);
-        $success = "Evenement '$title' succesvol toegevoegd!";
-        // Redirect na 2 seconden voor visuele feedback
-        header("Refresh: 2; url=dashboard.php");
+        setFlashMessage('success', "Evenement '$title' succesvol toegevoegd!");
+        header("Location: dashboard.php");
+        exit();
     }
 }
 ?>
@@ -57,10 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </nav>
     <section class="container mt-5 add-event">
         <h2 class="text-center">Evenement toevoegen</h2>
-        <?php 
-        if (isset($error)) echo "<p class='text-danger text-center'>$error</p>"; 
-        if (isset($success)) echo "<p class='text-success text-center fw-bold'>$success</p>"; 
-        ?>
+        <?php if (isset($error)): ?>
+            <p class="text-danger text-center"><?php echo $error; ?></p>
+        <?php endif; ?>
         <form method="POST" class="col-md-6 mx-auto">
             <div class="mb-3">
                 <label for="title" class="form-label">Titel</label>
@@ -77,12 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-3">
                 <label for="category" class="form-label">Categorie</label>
                 <select class="form-select" id="category" name="category" required>
-                    <?php 
-                    // Loop door categorieën (flow control)
-                    foreach ($categories as $key => $value) {
-                        echo "<option value='$key'>$value</option>";
-                    }
-                    ?>
+                    <?php foreach ($categories as $key => $value): ?>
+                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="mb-3 form-check">
@@ -102,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </section>
     <footer class="bg-dark text-white text-center py-3 mt-5">
-        <p>&copy; 2025 StudyMate Event Manager</p>
+        <p>© 2025 StudyMate Event Manager</p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>

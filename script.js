@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gsap.from('.navbar', { y: -50, duration: 0.8, ease: 'power2.out' });
     gsap.from('section', { opacity: 0, y: 20, duration: 1, stagger: 0.2 });
 
-    // Animeer succesmelding als deze bestaat
+    // Animeer succesmelding (groen bij toevoegen)
     const successMessage = document.querySelector('.text-success');
     if (successMessage) {
         gsap.from(successMessage, { 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Schakel reminder-tijdveld in/uit met checkbox
+    // Schakel reminder-tijdveld in/uit
     const reminderCheckbox = document.getElementById('reminder');
     const reminderTimeSelect = document.getElementById('reminder_time');
     if (reminderCheckbox && reminderTimeSelect) {
@@ -26,6 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 opacity: reminderCheckbox.checked ? 1 : 0.5, 
                 duration: 0.3 
             });
+        });
+    }
+
+    // Animeer notificaties
+    const notificationItems = document.querySelectorAll('.list-group-item');
+    if (notificationItems.length) {
+        gsap.from(notificationItems, { 
+            opacity: 0, 
+            y: 10, 
+            duration: 0.5, 
+            stagger: 0.1 
         });
     }
 });

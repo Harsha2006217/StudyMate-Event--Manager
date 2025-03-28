@@ -4,14 +4,14 @@ body {
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
-    min-height: 100vh; /* Zorgt voor volledige hoogte */
+    min-height: 100vh;
 }
 
 /* Navbar en Footer */
 .navbar-brand {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #fff; /* Witte tekst voor contrast */
+    color: #fff;
 }
 
 .navbar-nav .nav-link.active {
@@ -30,7 +30,7 @@ footer {
 
 /* Main content */
 section {
-    padding-bottom: 80px; /* Ruimte voor vaste footer */
+    padding-bottom: 80px;
 }
 
 /* Evenementen in kalender */
@@ -40,21 +40,18 @@ section {
     border-radius: 4px;
     color: white;
     font-size: 0.9rem;
-    display: block;
-    transition: transform 0.2s ease, opacity 0.3s ease;
+    transition: transform 0.2s ease;
 }
 
 .event:hover {
     transform: scale(1.03);
-    opacity: 0.9;
 }
 
-/* Categoriekleuren */
 .school { background-color: #dc3545; }
 .sociaal { background-color: #28a745; }
 .gaming { background-color: #007bff; }
 
-/* Toevoegen van een evenement: visuele feedback */
+/* Toevoegen van een evenement */
 .add-event {
     max-width: 600px;
     margin: 0 auto;
@@ -83,12 +80,12 @@ section {
     border: 1px solid #ced4da;
     border-radius: 5px;
     padding: 8px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.3s ease;
 }
 
 .add-event .form-control:focus,
 .add-event .form-select:focus {
-    border-color: #28a745; /* Groene rand bij focus */
+    border-color: #28a745; /* Groen bij focus */
     box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
     outline: none;
 }
@@ -102,7 +99,7 @@ section {
 }
 
 .add-event .btn-success:hover {
-    background-color: #218838; /* Donkerder groen bij hover */
+    background-color: #218838;
     border-color: #1e7e34;
     transform: scale(1.02);
 }
@@ -120,39 +117,26 @@ section {
     transform: scale(1.02);
 }
 
+/* Notificaties */
+.list-group-item {
+    border-left: 4px solid #28a745; /* Groen accent */
+}
+
 /* Animaties */
 section {
     animation: fadeIn 0.5s ease-in;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsieve aanpassingen */
 @media (max-width: 768px) {
-    .navbar-brand {
-        font-size: 1.25rem;
-    }
-    .add-event {
-        max-width: 100%;
-        padding: 0 15px;
-    }
-    .add-event form {
-        padding: 15px;
-    }
-    .event {
-        font-size: 0.85rem;
-        padding: 4px 8px;
-    }
-    footer {
-        font-size: 0.9rem;
-    }
+    .navbar-brand { font-size: 1.25rem; }
+    .add-event { max-width: 100%; padding: 0 15px; }
+    .add-event form { padding: 15px; }
+    .event { font-size: 0.85rem; padding: 4px 8px; }
+    footer { font-size: 0.9rem; }
 }
