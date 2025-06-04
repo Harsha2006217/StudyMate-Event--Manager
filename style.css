@@ -1,36 +1,46 @@
-/* Algemene styling */
+/**
+ * StudyMate Event Manager Stijlbestand
+ * 
+ * Dit CSS-bestand definieert de visuele stijl van de StudyMate applicatie.
+ * De stijlen zijn georganiseerd per onderdeel: algemene styling, navigatie,
+ * hoofdinhoud, formulieren, en responsieve aanpassingen.
+ */
+
+/* Algemene styling voor de hele pagina */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
+    font-family: Arial, sans-serif;    /* Standaard lettertype voor betere leesbaarheid */
+    background-color: #f4f4f4;         /* Lichtgrijze achtergrond voor een rustige uitstraling */
+    margin: 0;                         /* Verwijdert standaard marge rondom de pagina */
+    padding: 0;                        /* Verwijdert standaard opvulling rondom de pagina */
+    min-height: 100vh;                 /* Zorgt ervoor dat de pagina minstens de volledige viewporthoogte inneemt */
 }
 
-/* Navbar en Footer */
+/* Styling voor navigatiebalk (bovenaan) en voettekst (onderaan) */
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
+    font-size: 1.5rem;                /* Grotere lettergrootte voor de merknaam */
+    font-weight: bold;                /* Vetgedrukt voor betere zichtbaarheid */
+    color: #fff;                      /* Witte tekstkleur voor contrast met donkere achtergrond */
 }
 
 .navbar-nav .nav-link.active {
-    color: #28a745; /* Groen voor actieve link */
+    color: #28a745;                   /* Groene kleur voor de actieve navigatielink */
+                                     /* Dit helpt gebruikers te zien op welke pagina ze zich bevinden */
 }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: #343a40;
-    color: #fff;
-    padding: 1rem 0;
-    text-align: center;
+    position: fixed;                  /* Vaste positie onderaan het scherm */
+    bottom: 0;                        /* Uitlijning aan de onderkant van het venster */
+    width: 100%;                      /* Volle breedte van het venster */
+    background-color: #343a40;        /* Donkergrijze achtergrond, overeenkomend met de navigatiebalk */
+    color: #fff;                      /* Witte tekstkleur voor contrast */
+    padding: 1rem 0;                  /* Ruimte boven en onder de tekst (1rem = 16px) */
+    text-align: center;               /* Centreer de tekst in de voettekst */
 }
 
-/* Main content */
+/* Hoofdinhoud van de pagina */
 section {
-    padding-bottom: 80px;
+    padding-bottom: 80px;             /* Extra ruimte onder de inhoud zodat deze niet achter de footer verdwijnt */
+                                     /* 80px komt overeen met de hoogte van de footer plus wat extra ruimte */
 }
 
 /* Evenementen in kalender */

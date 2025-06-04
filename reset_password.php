@@ -1,33 +1,64 @@
 <?php
+/**
+ * Wachtwoord Reset Script
+ * 
+ * Dit bestand verwerkt het resetten van wachtwoorden via een unieke token.
+ * Gebruikers kunnen hier een nieuw wachtwoord instellen nadat ze een 
+ * wachtwoordreset hebben aangevraagd via de "Wachtwoord vergeten" functie.
+ */
+
+// Laad de benodigde functies
 require_once 'functions.php';
+
+// Controleer of de gebruiker al is ingelogd; stuur door naar dashboard indien ja
+// Een ingelogde gebruiker heeft geen wachtwoordreset nodig
 if (isLoggedIn()) {
     header("Location: dashboard.php");
     exit();
 }
 
-// Valideer token
+// Valideer de reset token uit de URL-parameter
+// filter_input wordt gebruikt voor veilige verwerking van de parameter
 $token = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_STRING);
 if (!$token) {
+    // Stop de uitvoering als er geen geldige token aanwezig is
     die("Ongeldig token.");
 }
 
+// Controleer of de token in de database bestaat en nog niet is verlopen
+// De reset_expiry datum moet in de toekomst liggen (groter dan NOW())
 $stmt = $pdo->prepare("SELECT * FROM users WHERE reset_token = ? AND reset_expiry > NOW()");
 $stmt->execute([$token]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Als er geen gebruiker is gevonden met deze token (of de token is verlopen)
 if (!$user) {
+    // Stop de uitvoering en toon een foutmelding
     die("Token ongeldig of verlopen.");
 }
 
+// Verwerk het formulier als het is verzonden (POST-verzoek)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Haal het nieuwe wachtwoord op met nullish coalescing operator (??)
+    // Dit geeft een lege string als de parameter niet bestaat
     $password = $_POST['password'] ?? '';
+    
+    // Valideer het wachtwoord op lengte (minimaal 8 tekens)
     if (strlen($password) < 8) {
         $error = "Wachtwoord moet minimaal 8 tekens lang zijn.";
     } else {
+        // Hash het nieuwe wachtwoord voor veilige opslag in de database
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+        
+        // Update de gebruiker met het nieuwe wachtwoord en verwijder de reset token
+        // Door reset_token en reset_expiry op NULL te zetten kan de token niet opnieuw worden gebruikt
         $stmt = $pdo->prepare("UPDATE users SET password = ?, reset_token = NULL, reset_expiry = NULL WHERE id = ?");
         $stmt->execute([$hashed_password, $user['id']]);
+        
+        // Toon een succesmelding op de inlogpagina
         setFlashMessage('success', 'Wachtwoord succesvol gewijzigd!');
+        
+        // Stuur de gebruiker naar de inlogpagina om in te loggen met het nieuwe wachtwoord
         header("Location: index.php");
         exit();
     }
