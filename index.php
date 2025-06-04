@@ -19,23 +19,46 @@ if (isLoggedIn()) {
 // Verwerk het inlogformulier als het is verzonden (POST-verzoek)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Haal de ingevoerde gegevens op en beveilig ze
+    
+    // We halen het e-mailadres op en maken het veilig met sanitizeInput()
+    // sanitizeInput() zorgt ervoor dat er geen schadelijke code in kan zitten
     $email = sanitizeInput($_POST['email']);
-    $password = $_POST['password']; // Wachtwoord niet sanitizen omdat het gehashed wordt
+    
+    // We halen het wachtwoord op maar maken het NIET veilig met sanitizeInput()
+    // Dit is omdat we het wachtwoord gaan vergelijken met een versleutelde versie
+    // Als we sanitizeInput zouden gebruiken, zou de vergelijking niet werken
+    $password = $_POST['password'];
 
-    // Zoek de gebruiker op in de database op basis van e-mailadres
+    // Nu gaan we in de database zoeken naar een gebruiker met dit e-mailadres
+    // We maken eerst een veilige zoekopdracht (query) klaar met prepare()
+    // Het vraagteken ? is een plaatshouder voor het e-mailadres dat we veilig willen invoegen
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+    
+    // Nu voeren we de zoekopdracht uit en vullen het e-mailadres in op de plaats van ?
     $stmt->execute([$email]);
+    
+    // We halen de gevonden gebruiker op (als die bestaat)
+    // FETCH_ASSOC betekent dat we de gegevens krijgen als een lijst met namen en waarden
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Controleer of de gebruiker bestaat en het wachtwoord klopt
+    // Nu controleren we of er een gebruiker is gevonden EN of het wachtwoord juist is
+    // password_verify controleert of het ingevoerde wachtwoord overeenkomt met de versleutelde versie
+    // die in de database staat
     if ($user && password_verify($password, $user['password'])) {
-        // Sla gebruikers-ID op in sessie om de login te onthouden
+        // Als alles klopt, slaan we de ID van de gebruiker op in de sessie
+        // De sessie is een soort tijdelijk geheugen dat de website gebruikt om te onthouden wie je bent
+        // Door de user_id op te slaan, weet de website bij volgende pagina's nog steeds wie er is ingelogd
         $_SESSION['user_id'] = $user['id'];
-        // Stuur de gebruiker naar het dashboard
+        
+        // We sturen de gebruiker door naar het dashboard (de hoofdpagina na inloggen)
         header("Location: dashboard.php");
+        
+        // We stoppen de uitvoering van de code hier, omdat de gebruiker toch wordt doorgestuurd
         exit();
     } else {
-        // Toon foutmelding als inloggegevens onjuist zijn
+        // Als het e-mailadres niet bestaat OF het wachtwoord klopt niet, maken we een foutmelding
+        // We zeggen bewust niet precies wat er mis is (voor de veiligheid)
+        // Dit voorkomt dat iemand kan achterhalen welke e-mailadressen in de database staan
         $error = "Ongeldige e-mail of wachtwoord.";
     }
 }
@@ -43,11 +66,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <!-- Meta-informatie voor de browser en responsiveness -->
+    <!-- Deze regels geven informatie aan de browser over hoe de pagina moet worden weergegeven -->
+    <!-- charset="UTF-8" zorgt ervoor dat speciale tekens (zoals é, ë, ç) goed worden weergegeven -->
     <meta charset="UTF-8">
+    
+    <!-- Dit zorgt ervoor dat de website er goed uitziet op mobiele telefoons -->
+    <!-- Het past de grootte van de website aan aan de grootte van het scherm -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- De titel die bovenaan in het browsertabblad wordt weergegeven -->
     <title>StudyMate - Inloggen</title>
-    <!-- CSS-bestanden voor styling -->
+    
+    <!-- Hier laden we de opmaakbestanden (CSS) in die bepalen hoe de website eruitziet -->
+    <!-- style.css is ons eigen opmaakbestand -->
     <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>

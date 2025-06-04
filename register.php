@@ -1,27 +1,79 @@
 <?php
+/**
+ * Registratiepagina - Hier kan een nieuwe gebruiker een account aanmaken
+ * 
+ * Deze pagina doet het volgende:
+ * 1. Controleren of iemand al is ingelogd (dan hoeft registreren niet meer)
+ * 2. Het registratieformulier tonen met velden voor e-mail en wachtwoord
+ * 3. De ingevulde gegevens controleren op juistheid
+ * 4. Een nieuw account aanmaken als alles klopt
+ * 5. De gebruiker doorsturen naar de inlogpagina om in te loggen met het nieuwe account
+ */
+
+// We laden eerst alle hulpfuncties in die we nodig hebben
 require_once 'functions.php';
+
+// We controleren of de gebruiker al is ingelogd
+// Als dat zo is, heeft registreren geen zin meer
+// Dan sturen we de gebruiker meteen door naar het dashboard (de hoofdpagina na inloggen)
 if (isLoggedIn()) {
     header("Location: dashboard.php");
     exit();
 }
 
+// Dit deel wordt alleen uitgevoerd als het formulier is ingevuld en verzonden
+// We controleren of er op de registreerknop is geklikt
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // We halen het ingevulde e-mailadres op en maken het veilig
+    // sanitizeInput verwijdert gevaarlijke code die kwaadwillenden zouden kunnen invoeren
+    // ?? '' zorgt ervoor dat als er niets is ingevuld, we een lege tekst gebruiken
     $email = sanitizeInput($_POST['email'] ?? '');
+    
+    // We halen het ingevulde wachtwoord op
+    // We beveiligen het wachtwoord niet met sanitizeInput omdat we het gaan versleutelen
     $password = $_POST['password'] ?? '';
 
+    // We controleren of het e-mailadres wel echt een e-mailadres is
+    // filter_var controleert of het e-mailadres een @ teken heeft en er goed uitziet
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        // Als het geen geldig e-mailadres is, maken we een foutmelding
         $error = "Ongeldig e-mailadres.";
-    } elseif (strlen($password) < 8) {
+    } 
+    // We controleren of het wachtwoord lang genoeg is (minstens 8 tekens)
+    // strlen telt het aantal tekens in het wachtwoord
+    elseif (strlen($password) < 8) {
+        // Als het wachtwoord te kort is, maken we een foutmelding
         $error = "Wachtwoord moet minimaal 8 tekens lang zijn.";
-    } else {
+    } 
+    // Als beide controles goed zijn, gaan we het account aanmaken
+    else {
+        // We gebruiken try-catch om eventuele fouten netjes af te handelen
         try {
+            // We versleutelen het wachtwoord zodat het veilig kan worden opgeslagen
+            // Versleutelde wachtwoorden kunnen niet worden teruggelezen, maar wel worden gecontroleerd
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+            
+            // We maken een veilige database-opdracht om de nieuwe gebruiker op te slaan
+            // De vraagtekens (?) zijn plaatshouders voor het e-mailadres en wachtwoord
             $stmt = $pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
+            
+            // We voeren de opdracht uit en vullen het e-mailadres en versleutelde wachtwoord in
             $stmt->execute([$email, $hashed_password]);
+            
+            // We maken een succesmelding voor de gebruiker
+            // Deze wordt getoond op de inlogpagina
             setFlashMessage('success', 'Registratie succesvol! Log in om te beginnen.');
+            
+            // We sturen de gebruiker door naar de inlogpagina om in te loggen
             header("Location: index.php");
+            
+            // We stoppen het script hier, omdat de gebruiker toch wordt doorgestuurd
             exit();
-        } catch (PDOException $e) {
+        } 
+        // Als er iets mis gaat bij het opslaan, vangen we de fout op
+        catch (PDOException $e) {
+            // De meest waarschijnlijke fout is dat het e-mailadres al bestaat
+            // We geven een duidelijke foutmelding aan de gebruiker
             $error = "E-mailadres bestaat al.";
         }
     }
@@ -30,20 +82,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+    <!-- Deze regels geven informatie aan de browser over de pagina -->
+    <!-- charset="UTF-8" zorgt ervoor dat speciale tekens goed worden weergegeven -->
     <meta charset="UTF-8">
+    <!-- Deze regel zorgt dat de pagina er goed uitziet op mobiele telefoons -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- De titel die bovenin het browsertabblad wordt weergegeven -->
     <title>StudyMate - Registreren</title>
+    <!-- CSS-bestanden voor opmaak en stijl -->
+    <!-- Eigen stylesheet voor specifieke stijlen van de applicatie -->
     <link rel="stylesheet" href="style.css">
+    <!-- Bootstrap CSS voor kant-en-klare stijlen en responsiviteit -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Navigatiebalk bovenaan de pagina -->
+    <!-- Bevat de naam van de applicatie en is altijd zichtbaar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
+            <!-- Naam van de applicatie, klikbaar logo -->
             <a class="navbar-brand" href="#">StudyMate</a>
         </div>
     </nav>
+    
+    <!-- Hoofdgedeelte van de pagina, hier komt het registratieformulier -->
     <section class="container mt-5">
+        <!-- Titel van de sectie, groot en gecentreerd -->
         <h2 class="text-center">Registreren</h2>
+        
+        <!-- Foutmelding sectie -->
+        <!-- Alleen zichtbaar als er een fout is, bijvoorbeeld bij een ongeldig e-mailadres -->
         <?php if (isset($error)): ?>
             <p class="text-danger text-center"><?php echo $error; ?></p>
         <?php endif; ?>

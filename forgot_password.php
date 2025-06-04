@@ -1,37 +1,56 @@
 <?php
 /**
- * Wachtwoord Vergeten Pagina
+ * "Wachtwoord Vergeten" Pagina
  * 
- * Deze pagina stelt gebruikers in staat om een wachtwoordreset aan te vragen
- * wanneer ze hun wachtwoord zijn vergeten. Het genereert een unieke token
- * en zou normaal gesproken een e-mail sturen (in deze demo wordt dat gesimuleerd).
+ * Dit bestand zorgt ervoor dat gebruikers die hun wachtwoord zijn vergeten een nieuw wachtwoord 
+ * kunnen aanvragen. De gebruiker vult zijn e-mailadres in, en dan wordt er een speciale link
+ * gemaakt waarmee het wachtwoord opnieuw kan worden ingesteld.
+ * 
+ * In een echte website zou er een e-mail worden verstuurd, maar hier laten we gewoon de link zien.
  */
 
-// Laad de benodigde functies
+// Hier laden we alle hulpfuncties in die we nodig hebben
+// Dit bestand bevat functies zoals isLoggedIn(), sanitizeInput() en andere handige functies
 require_once 'functions.php';
 
-// Controleer of de gebruiker al is ingelogd; stuur door naar dashboard indien ja
+// Hier controleren we of de gebruiker al is ingelogd
+// Als iemand al is ingelogd, heeft hij geen wachtwoord reset nodig
+// We sturen hem dan direct door naar zijn persoonlijke pagina (dashboard)
 if (isLoggedIn()) {
+    // Deze regel stuurt de browser door naar een andere pagina
     header("Location: dashboard.php");
+    // Deze regel zorgt dat de code hierna niet meer wordt uitgevoerd
     exit();
 }
 
-// Verwerk het formulier als het is verzonden (POST-verzoek)
+// Deze code wordt alleen uitgevoerd als iemand op de knop "Resetlink aanvragen" heeft gedrukt
+// $_SERVER['REQUEST_METHOD'] vertelt ons of het formulier is verzonden (POST) of niet (GET)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Haal het e-mailadres op en beveilig het tegen XSS-aanvallen
+    // We halen het e-mailadres op dat de gebruiker heeft ingevuld
+    // sanitizeInput() zorgt ervoor dat er geen schadelijke code in het e-mailadres kan zitten
+    // Dit is belangrijk voor de veiligheid van de website
     $email = sanitizeInput($_POST['email']);
     
-    // Genereer een unieke token voor de wachtwoordreset
+    // Hier maken we een speciale code (token) die we alleen aan deze gebruiker geven
+    // Deze code wordt gebruikt in de resetlink om te controleren of de juiste persoon de link gebruikt
     $token = generateResetToken();
     
-    // Stel de vervaldatum in (1 uur vanaf nu)
+    // We stellen in dat de resetlink maar 1 uur geldig is
+    // Na dat uur kan de link niet meer gebruikt worden voor veiligheid
+    // strtotime('+1 hour') berekent de tijd over 1 uur vanaf nu
+    // date() zet deze tijd om in een formaat dat de database begrijpt
     $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-    // Sla de token en vervaldatum op in de database voor de gebruiker met dit e-mailadres
+    // Nu slaan we de resetcode en de vervaltijd op in de database
+    // We doen dit alleen voor de gebruiker met het opgegeven e-mailadres
+    // De ? tekens zijn plaatshouders voor de waarden die we veilig willen invoegen
     $stmt = $pdo->prepare("UPDATE users SET reset_token = ?, reset_expiry = ? WHERE email = ?");
+    // Hier voeren we de opdracht uit met de echte waarden
     $stmt->execute([$token, $expiry, $email]);
 
-    // Toon een bevestiging aan de gebruiker (in een echte applicatie zou hier een e-mail worden verstuurd)
+    // Nu maken we een bericht voor de gebruiker dat de resetlink is verstuurd
+    // In een echte website zou er nu een e-mail verstuurd worden, maar hier simuleren we dat
+    // We tonen de link direct op het scherm (in een echte website zou je dit niet doen!)
     setFlashMessage('success', "Controleer je e-mail voor de resetlink (simulatie: reset_password.php?token=$token).");
     
     // Stuur de gebruiker terug naar de inlogpagina

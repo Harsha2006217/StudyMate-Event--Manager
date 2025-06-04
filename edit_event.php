@@ -142,30 +142,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-check-label" for="reminder">Herinnering instellen</label>
             </div>
             
-            <!-- Herinneringstijd selectie -->
+            <!-- Dit is de selectielijst voor het instellen van de herinneringstijd -->
+            <!-- Deze wordt alleen gebruikt als de gebruiker de herinnering heeft aangezet met de checkbox -->
             <div class="mb-3">
+                <!-- Dit label beschrijft wat de gebruiker gaat selecteren -->
                 <label for="reminder_time" class="form-label">Herinneringstijd</label>
+                
+                <!-- Dit is de uitklaplijst (dropdown) waar gebruikers uit verschillende tijden kunnen kiezen -->
+                <!-- Het id="reminder_time" zorgt ervoor dat dit veld gekoppeld is aan het label hierboven -->
+                <!-- name="reminder_time" is de naam waarmee deze keuze wordt opgeslagen in de database -->
                 <select class="form-select" id="reminder_time" name="reminder_time">
-                    <!-- Opties met de huidige instelling als geselecteerd -->
+                    <!-- Hieronder staan de drie keuzemogelijkheden voor de herinnering -->
+                    <!-- Bij elke optie controleren we (met PHP) of dit de huidige instelling is -->
+                    <!-- Als het de huidige instelling is, dan wordt 'selected' toegevoegd, zodat deze optie voorgeselecteerd is -->
+                    <!-- Het vraagteken ? betekent: "als dit waar is, gebruik dan 'selected', anders niets" -->
+                    
+                    <!-- Optie 1: 5 minuten voor het evenement -->
                     <option value="5 minuten ervoor" <?php echo $event['reminder_time'] === '5 minuten ervoor' ? 'selected' : ''; ?>>5 minuten ervoor</option>
+                    
+                    <!-- Optie 2: 30 minuten voor het evenement -->
                     <option value="30 minuten ervoor" <?php echo $event['reminder_time'] === '30 minuten ervoor' ? 'selected' : ''; ?>>30 minuten ervoor</option>
+                    
+                    <!-- Optie 3: 1 uur voor het evenement -->
                     <option value="1 uur ervoor" <?php echo $event['reminder_time'] === '1 uur ervoor' ? 'selected' : ''; ?>>1 uur ervoor</option>
                 </select>
             </div>
             
-            <!-- Actieknoppen -->
+            <!-- Hier beginnen de knoppen waarmee de gebruiker acties kan uitvoeren -->
+            
+            <!-- Dit is de hoofdknop om de wijzigingen op te slaan -->
+            <!-- type="submit" betekent dat deze knop het formulier zal versturen -->
+            <!-- De groene kleur (btn-success) geeft aan dat dit een positieve actie is -->
+            <!-- w-100 maakt de knop 100% breed, zodat deze het hele formulier vult -->
             <button type="submit" class="btn btn-success w-100">Opslaan</button>
+            
+            <!-- Dit is de tweede knop om terug te gaan zonder op te slaan -->
+            <!-- Dit is eigenlijk een link (a) die eruitziet als een knop -->
+            <!-- href="dashboard.php" betekent dat deze link naar het dashboard (overzichtspagina) gaat -->
+            <!-- De grijze kleur (btn-secondary) laat zien dat dit niet de hoofdactie is -->
+            <!-- mt-2 zorgt voor een klein beetje ruimte tussen deze knop en de knop erboven -->
             <a href="dashboard.php" class="btn btn-secondary w-100 mt-2">Terug naar overzicht</a>
         </form>
     </section>
     
-    <!-- Voettekst van de pagina -->
+    <!-- Hier begint de voettekst (footer) die onderaan elke pagina staat -->
+    <!-- Deze heeft een donkere achtergrond (bg-dark) en witte tekst (text-white) -->
+    <!-- text-center zorgt dat de tekst in het midden staat -->
+    <!-- py-3 zorgt voor ruimte boven en onder de tekst -->
+    <!-- mt-5 zorgt voor veel ruimte tussen de inhoud en de footer -->
     <footer class="bg-dark text-white text-center py-3 mt-5">
+        <!-- Het copyright-symbool en jaartal -->
         <p>© 2025 StudyMate Event Manager</p>
     </footer>
     
-    <!-- JavaScript-bestanden voor interactiviteit -->
+    <!-- Hier worden externe bestanden ingeladen die de website interactiever maken -->
+    
+    <!-- Dit laadt Bootstrap in, een pakket met vooraf gemaakte functies -->
+    <!-- Hierdoor werken bijvoorbeeld uitklapmenu's en animaties -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Dit laadt ons eigen script in met speciale functies voor deze website -->
+    <!-- Hierin staat bijvoorbeeld de code die ervoor zorgt dat het herinneringstijdveld -->
+    <!-- automatisch wordt in- of uitgeschakeld wanneer je de checkbox aanklikt -->
     <script src="script.js"></script>
 </body>
 </html>

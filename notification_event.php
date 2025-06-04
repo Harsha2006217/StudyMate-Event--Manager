@@ -1,35 +1,52 @@
 <?php
 /**
- * Notificatie Weergave Script
+ * Herinneringen-pagina - Hier zie je berichten over je aankomende activiteiten
  * 
- * Dit bestand toont alle actieve herinneringen (notificaties) voor toekomstige evenementen
- * van de ingelogde gebruiker. Het filtert de evenementen op basis van de ingestelde
- * herinneringen en toont alleen evenementen die in het heden of de toekomst plaatsvinden.
+ * Deze pagina heeft een simpel doel:
+ * 1. Het haalt alle toekomstige evenementen op waar je een herinnering voor hebt ingesteld
+ * 2. Het toont deze evenementen in een lijst, zodat je weet wat er binnenkort gaat gebeuren
+ * 3. Zo mis je nooit meer een belangrijke afspraak of gebeurtenis
  */
 
-// Laad de benodigde functies en controleer of de gebruiker is ingelogd
+// Stap 1: Controleren of je wel bent ingelogd
+// We laden eerst alle hulpfuncties in die we nodig hebben
 require_once 'functions.php';
+// Deze regel controleert of je bent ingelogd, anders word je teruggestuurd naar de inlogpagina
+// Dit is belangrijk zodat alleen jij je eigen herinneringen kunt zien
 requireLogin();
 
-// Haal evenementen met herinneringen op voor huidige en toekomstige datums
-// We filteren op:
-// - gebruiker (user_id)
-// - alleen evenementen met herinnering ingeschakeld (reminder = 1)
-// - alleen evenementen vanaf vandaag (date >= CURDATE())
-// - gesorteerd op datum en tijd
+// Stap 2: Ophalen van jouw evenementen met herinneringen
+// We maken een zoekopdracht (query) voor de database om alleen bepaalde evenementen te vinden:
+// - Alleen JOUW evenementen (WHERE user_id = ?)
+// - Alleen evenementen waarvoor een herinnering is ingesteld (AND reminder = 1)
+// - Alleen evenementen die vandaag of later plaatsvinden (AND date >= CURDATE())
+// - Gesorteerd op datum en tijd, zodat de eerstvolgende bovenaan staan
 $stmt = $pdo->prepare("SELECT * FROM events WHERE user_id = ? AND reminder = 1 AND date >= CURDATE() ORDER BY date, time");
+
+// Nu voeren we de zoekopdracht uit
+// We vullen op de plaats van ? jouw gebruikers-ID in (opgeslagen toen je inlogde)
 $stmt->execute([$_SESSION['user_id']]);
+
+// Hier halen we alle gevonden evenementen op en zetten ze in de variabele $events
+// Ze komen binnen als een lijst met alle informatie over elk evenement
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Genereer notificaties met array
-// We maken een nieuwe, opgeschoonde array met alleen de benodigde informatie
-// en beschermen tegen XSS-aanvallen door htmlspecialchars te gebruiken
+// Stap 3: Voorbereiden van de gegevens voor weergave op het scherm
+// We maken een lege lijst waar we alle herinneringen in gaan zetten
 $notifications = [];
+
+// We doorlopen elk gevonden evenement één voor één
 foreach ($events as $event) {
+    // Voor elk evenement voegen we een nieuwe herinnering toe aan onze lijst
+    // We maken hierbij een nieuw "pakketje" met alleen de informatie die we willen tonen:
     $notifications[] = [
+        // De titel van het evenement (beveiligd tegen schadelijke code met htmlspecialchars)
         'title' => htmlspecialchars($event['title']),
+        // De datum van het evenement
         'date' => $event['date'],
+        // De tijd van het evenement
         'time' => $event['time'],
+        // Hoelang van tevoren je herinnerd wilt worden (bijv. "5 minuten ervoor")
         'reminder_time' => $event['reminder_time']
     ];
 }

@@ -134,19 +134,48 @@ section {
 
 /* Animaties */
 section {
+    /* Deze regel zorgt voor een verschijningseffect wanneer de pagina wordt geladen */
+    /* De inhoud van de sectie verschijnt geleidelijk in 0,5 seconden */
+    /* 'ease-in' betekent dat de animatie langzaam begint en daarna versnelt */
     animation: fadeIn 0.5s ease-in;
 }
 
+/* Hier wordt uitgelegd HOE de verschijningsanimatie (fadeIn) werkt */
+/* Een @keyframes regel is als een klein filmscript dat vertelt wat er moet gebeuren */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    /* 'from' is het beginpunt van de animatie - hoe het er eerst uitziet */
+    from { 
+        opacity: 0;               /* Volledig onzichtbaar - opacity 0 betekent doorzichtig */
+        transform: translateY(15px); /* 15 pixels omhoog verschoven van de uiteindelijke positie */
+    }
+    /* 'to' is het eindpunt van de animatie - hoe het er op het eind uitziet */
+    to { 
+        opacity: 1;               /* Volledig zichtbaar - opacity 1 betekent niet doorzichtig */
+        transform: translateY(0); /* Op de normale positie - niet meer verschoven */
+    }
+    /* Deze animatie zorgt dus dat elementen 'invliegen' van beneden en tegelijk zichtbaar worden */
 }
 
-/* Responsieve aanpassingen */
+/* Aanpassingen voor kleinere schermen (zoals mobiele telefoons en tablets) */
+/* Deze regels worden alleen toegepast als het scherm smaller is dan 768 pixels */
+/* Zo zorgen we ervoor dat de website er goed uitziet op alle apparaten */
 @media (max-width: 768px) {
+    /* De naam van de website wordt iets kleiner op kleine schermen */
     .navbar-brand { font-size: 1.25rem; }
+    
+    /* Het formulier voor het toevoegen van evenementen gebruikt de volle breedte */
+    /* en krijgt wat ruimte aan de zijkanten */
     .add-event { max-width: 100%; padding: 0 15px; }
+    
+    /* Het formulier krijgt minder opvulling (ruimte binnenin) op kleine schermen */
     .add-event form { padding: 15px; }
+    
+    /* De evenement-blokjes in de kalender worden kleiner op kleine schermen */
     .event { font-size: 0.85rem; padding: 4px 8px; }
+    
+    /* De voettekst onderaan krijgt een iets kleinere letter op kleine schermen */
     footer { font-size: 0.9rem; }
+    
+    /* Deze aanpassingen zorgen ervoor dat alles netjes en leesbaar blijft */
+    /* zelfs op een klein scherm zoals een mobiele telefoon */
 }

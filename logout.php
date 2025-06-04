@@ -1,28 +1,38 @@
 <?php
 /**
- * Uitlogscript voor StudyMate Event Manager
+ * Uitloggen - Dit bestand zorgt ervoor dat je veilig kunt uitloggen
  * 
- * Dit bestand verwerkt het uitlogproces van gebruikers door de sessie te 
- * beëindigen en de gebruiker terug te sturen naar de inlogpagina. Wanneer dit 
- * script wordt aangeroepen, zal de gebruiker direct worden uitgelogd.
+ * Wat doet deze pagina precies:
+ * 1. Het verwijdert al je inloggegevens uit het systeem
+ * 2. Het zorgt ervoor dat je niet meer wordt herkend als ingelogde gebruiker
+ * 3. Het stuurt je terug naar de inlogpagina
+ *
+ * Dit is een heel eenvoudige pagina die maar één taak heeft: jou uitloggen.
+ * Als je op de "Uitloggen" knop klikt in het menu, kom je op deze pagina terecht.
  */
 
-// Laad de benodigde functies (dit initieert ook de sessie)
+// We beginnen met het inladen van alle hulpfuncties die we nodig hebben
+// Dit bestand (functions.php) bevat allerlei handige functies die we gebruiken
+// Het start ook automatisch een sessie, dat is een soort tijdelijk geheugen waar je inloggegevens zijn opgeslagen
 require_once 'functions.php';
 
-// Vernietig de sessie en alle opgeslagen sessiegegevens
-session_destroy();  // Verwijdert alle sessiedata van de server
+// Nu gaan we je uitloggen door de sessie te vernietigen
+// Een sessie is waar de website onthoudt wie je bent - door deze te vernietigen, 
+// vergeet de website als het ware wie je bent
+session_destroy();  // Deze opdracht verwijdert je hele sessie van de server
 
-// Leeg de sessie-array voor extra zekerheid
-// Dit zorgt ervoor dat zelfs als session_destroy() om een of andere reden faalt, 
-// de sessiegegevens nog steeds worden verwijderd uit het geheugen van het script
+// Voor de zekerheid maken we ook je sessie-variabelen leeg
+// Dit is een extra stap om zeker te weten dat alle inloggegevens weg zijn
+// Een lege [] betekent dat we de sessie vervangen door een lege lijst zonder gegevens
 $_SESSION = []; 
 
-// Stuur de gebruiker door naar de inlogpagina
-// Na uitloggen moet de gebruiker opnieuw inloggen om toegang te krijgen
+// Nu je uitgelogd bent, sturen we je terug naar de inlogpagina
+// De header-functie vertelt je browser om naar een andere pagina te gaan
+// In dit geval sturen we je naar index.php, dat is de inlogpagina
 header("Location: index.php");
 
-// Stop de uitvoering van het script
-// Dit voorkomt dat er code na de redirect wordt uitgevoerd
+// Deze regel zorgt ervoor dat de code hierna stopt met uitvoeren
+// Dit is belangrijk omdat we willen dat de doorverwijzing naar de inlogpagina
+// het laatste is wat gebeurt, zonder dat er nog andere dingen worden gedaan
 exit();
 ?>

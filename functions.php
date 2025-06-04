@@ -83,20 +83,43 @@ function setFlashMessage(string $type, string $message): void {
 }
 
 /**
- * Haalt een opgeslagen flash-bericht op en verwijdert het daarna
+ * Haalt een tijdelijk bericht op en maakt het daarna schoon
  * 
- * Deze functie controleert of er een flash-bericht is opgeslagen in de sessie,
- * geeft het terug als dat zo is, en verwijdert het vervolgens zodat het niet 
- * opnieuw wordt weergegeven bij volgende paginaweergaven.
+ * Wat doet deze functie precies:
+ * 1. Hij kijkt of er een kort bericht (flash-bericht) is opgeslagen in de gegevens van de gebruiker
+ * 2. Als er een bericht is, haalt hij dit op zodat het kan worden getoond
+ * 3. Hij verwijdert meteen dit bericht, zodat het maar één keer wordt getoond
+ * 4. Hij geeft het bericht terug aan de pagina die het wil gebruiken
  * 
- * @return array|null - Het flash-bericht als array (type en message) of null als er geen bericht is
+ * Deze functie wordt gebruikt om berichten te tonen zoals:
+ * - "Je evenement is succesvol toegevoegd"
+ * - "Je wachtwoord is gewijzigd"
+ * - "Er is iets misgegaan bij het verwijderen"
+ * 
+ * De berichten worden maar één keer getoond, ook als je de pagina daarna ververst.
+ * 
+ * De functie geeft het bericht terug als het bestaat, anders geeft hij 'null' (niets) terug.
  */
 function getFlashMessage(): ?array {
+    // Controleer of er een flash-bericht is opgeslagen in de sessie van de gebruiker
+    // Een sessie is als een geheugen dat de website gebruikt om dingen te onthouden over een gebruiker
     if (isset($_SESSION['flash'])) {
+        // Als er een bericht is, bewaar het tijdelijk in de variabele $flash
+        // Zodat we het straks kunnen teruggeven aan de pagina die het wil tonen
         $flash = $_SESSION['flash'];
+        
+        // Verwijder het bericht direct uit de sessie
+        // Dit zorgt ervoor dat als de gebruiker de pagina ververst, het bericht niet opnieuw verschijnt
+        // Het is als een zelfvernietigende notitie - eenmaal gelezen, wordt het verwijderd
         unset($_SESSION['flash']);
+        
+        // Geef het bericht terug aan de pagina die de functie heeft aangeroepen
+        // Zodat die pagina het kan tonen aan de gebruiker
         return $flash;
     }
+    
+    // Als er geen bericht is gevonden, geef dan 'null' terug
+    // Dit vertelt de pagina dat er geen bericht is om te tonen
     return null;
 }
 ?>

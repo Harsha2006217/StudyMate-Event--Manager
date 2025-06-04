@@ -131,27 +131,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <!-- Herinneringstijd selectie -->
             <div class="mb-3">
+                <!-- Dropdown menu voor het selecteren van de herinneringstijd -->
+                <!-- Het label beschrijft het doel van het selectieveld voor gebruikers -->
                 <label for="reminder_time" class="form-label">Herinneringstijd</label>
+                <!-- Het select element met Bootstrap styling (form-select) -->
+                <!-- Dit wordt automatisch in- of uitgeschakeld door JavaScript op basis van de checkbox -->
                 <select class="form-select" id="reminder_time" name="reminder_time">
+                    <!-- Verschillende opties voor herinneringstijden -->
+                    <!-- De value-attributen bevatten de waarden die naar de server worden verzonden -->
                     <option value="5 minuten ervoor">5 minuten ervoor</option>
                     <option value="30 minuten ervoor">30 minuten ervoor</option>
                     <option value="1 uur ervoor">1 uur ervoor</option>
                 </select>
             </div>
             
-            <!-- Actieknoppen voor verzenden of annuleren -->
+            <!-- Formulierknoppen voor gebruikersacties -->
+            <!-- De primaire actieknop (opslaan) met groene Bootstrap-styling -->
+            <!-- w-100 zorgt ervoor dat de knop de volledige breedte inneemt -->
             <button type="submit" class="btn btn-success w-100">Opslaan</button>
+            
+            <!-- Een link die eruitziet als een knop om terug te gaan naar het overzichtspagina -->
+            <!-- Deze link gebruikt de volgende elementen: -->
+            <!-- - href="dashboard.php": stuurt de gebruiker naar het dashboard wanneer erop geklikt wordt -->
+            <!-- - class="btn": maakt het een knop in plaats van een gewone link -->
+            <!-- - btn-secondary: geeft de knop een grijze kleur om aan te geven dat dit een tweede keuze is -->
+            <!-- - w-100: maakt de knop 100% breed, zodat deze de hele beschikbare ruimte gebruikt -->
+            <!-- - mt-2: voegt een kleine ruimte (margin-top) toe boven de knop, zodat deze niet tegen de opslaan-knop aan zit -->
             <a href="dashboard.php" class="btn btn-secondary w-100 mt-2">Terug naar overzicht</a>
         </form>
     </section>
     
-    <!-- Voettekst van de pagina -->
+    <!-- De voettekst (footer) die onderaan elke pagina staat -->
+    <!-- Deze voettekst bevat: -->
+    <!-- - bg-dark: een donkere achtergrondkleur (bijna zwart) -->
+    <!-- - text-white: witte tekstkleur voor goede leesbaarheid op de donkere achtergrond -->
+    <!-- - text-center: tekst wordt in het midden geplaatst -->
+    <!-- - py-3: padding (ruimte) aan de bovenkant en onderkant, zodat de tekst niet tegen de randen zit -->
+    <!-- - mt-5: een grote ruimte (margin-top) boven de footer, zodat er afstand is tussen de inhoud en de footer -->
     <footer class="bg-dark text-white text-center py-3 mt-5">
+        <!-- De tekst in de footer met het copyright-symbool en het jaartal -->
+        <!-- Dit laat zien wie de eigenaar is van de website en wanneer het copyright is vastgelegd -->
         <p>© 2025 StudyMate Event Manager</p>
     </footer>
     
-    <!-- JavaScript-bestanden voor interactiviteit -->
+    <!-- Hier worden de JavaScript-bestanden ingeladen die de website interactief maken -->
+    <!-- Dit eerste script laadt Bootstrap JavaScript in, dat zorgt voor: -->
+    <!-- - De werking van het uitklapbare menu in de navigatiebalk -->
+    <!-- - Interactieve elementen zoals dropdown-menu's -->
+    <!-- - Responsive gedrag op verschillende schermgroottes -->
+    <!-- We laden dit in vanaf een CDN (Content Delivery Network) voor snelle laadtijden -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Dit is ons eigen JavaScript-bestand met specifieke functies voor deze website -->
+    <!-- In dit bestand staan onder andere deze functies: -->
+    <!-- - Het automatisch in- of uitschakelen van het herinneringstijd-veld wanneer de checkbox wordt aan/uitgezet -->
+    <!-- - Animaties die elementen laten verschijnen met een mooi effect -->
+    <!-- - Interactieve feedback wanneer gebruikers op knoppen klikken of formulieren invullen -->
     <script src="script.js"></script>
 </body>
 </html>

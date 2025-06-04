@@ -1,37 +1,49 @@
 <?php
 /**
- * Wachtwoord Reset Script
+ * Wachtwoord opnieuw instellen - Voor als je je wachtwoord bent vergeten
  * 
- * Dit bestand verwerkt het resetten van wachtwoorden via een unieke token.
- * Gebruikers kunnen hier een nieuw wachtwoord instellen nadat ze een 
- * wachtwoordreset hebben aangevraagd via de "Wachtwoord vergeten" functie.
+ * Deze pagina heeft een belangrijk doel:
+ * 1. Het laat gebruikers een nieuw wachtwoord kiezen als ze hun oude zijn vergeten
+ * 2. Het controleert of ze wel echt een reset hebben aangevraagd (via een speciale code)
+ * 3. Het zorgt ervoor dat het nieuwe wachtwoord veilig wordt opgeslagen
+ * 
+ * De gebruiker komt op deze pagina nadat hij/zij via de "Wachtwoord vergeten" functie
+ * een e-mail heeft ontvangen met een speciale link naar deze pagina.
  */
 
-// Laad de benodigde functies
+// We laden eerst alle hulpfuncties in die we nodig hebben
 require_once 'functions.php';
 
-// Controleer of de gebruiker al is ingelogd; stuur door naar dashboard indien ja
-// Een ingelogde gebruiker heeft geen wachtwoordreset nodig
+// We controleren of de gebruiker al is ingelogd
+// Als iemand al is ingelogd, heeft hij/zij geen wachtwoordreset nodig
+// Dan sturen we de gebruiker meteen door naar de hoofdpagina
 if (isLoggedIn()) {
     header("Location: dashboard.php");
     exit();
 }
 
-// Valideer de reset token uit de URL-parameter
-// filter_input wordt gebruikt voor veilige verwerking van de parameter
+// We halen de speciale code (token) uit de link waarmee de gebruiker hier kwam
+// De token staat in de URL, bijvoorbeeld: reset_password.php?token=abc123
+// filter_input zorgt ervoor dat we de token veilig ophalen, zonder gevaarlijke tekens
 $token = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_STRING);
+
+// Als er geen token in de URL staat of als deze leeg is, stoppen we meteen
+// De gebruiker moet een geldige link gebruiken die via e-mail is verstuurd
 if (!$token) {
-    // Stop de uitvoering als er geen geldige token aanwezig is
+    // We stoppen het script en tonen een duidelijke foutmelding
     die("Ongeldig token.");
 }
 
-// Controleer of de token in de database bestaat en nog niet is verlopen
-// De reset_expiry datum moet in de toekomst liggen (groter dan NOW())
+// Nu gaan we controleren of deze token echt bestaat in onze database
+// We zoeken naar een gebruiker met deze token, waarbij de token nog niet is verlopen
+// "reset_expiry > NOW()" betekent dat de vervaldatum in de toekomst moet liggen
 $stmt = $pdo->prepare("SELECT * FROM users WHERE reset_token = ? AND reset_expiry > NOW()");
 $stmt->execute([$token]);
+// We halen de gevonden gebruiker op (als die bestaat)
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Als er geen gebruiker is gevonden met deze token (of de token is verlopen)
+// Als we geen gebruiker vinden met deze token, of als de token is verlopen
+// (de vervaldatum ligt in het verleden), dan stoppen we hier
 if (!$user) {
     // Stop de uitvoering en toon een foutmelding
     die("Token ongeldig of verlopen.");
