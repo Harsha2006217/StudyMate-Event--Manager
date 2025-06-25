@@ -2,64 +2,48 @@
 /**
  * Database Verbinding Script
  * 
- * Dit bestand heeft één belangrijke taak: zorgen dat onze website verbinding kan maken
- * met de database waar alle informatie wordt opgeslagen. Zonder deze verbinding kunnen
- * we geen gegevens opslaan of ophalen (zoals gebruikers of evenementen).
- * 
- * Dit is meestal het eerste bestand dat wordt ingeladen in andere PHP-bestanden
- * omdat de database-verbinding bijna altijd nodig is.
+ * Dit bestand maakt verbinding met de MySQL database voor StudyMate Event Manager.
+ * Deze verbinding is essentieel voor elke pagina die informatie moet ophalen of opslaan.
  */
 
-// Hieronder staan de vier belangrijke gegevens die nodig zijn om met de database te verbinden
-// We gebruiken constanten (const) omdat deze waarden nooit veranderen tijdens het gebruik
-const DB_HOST = 'localhost';    // Dit is de naam of het adres van de computer waar de database staat
-                               // 'localhost' betekent dat de database op dezelfde computer staat als de website
-
-const DB_NAME = 'studymate_db'; // Dit is de naam van de database die we gaan gebruiken
-                               // Hierin staan tabellen zoals 'users' en 'events'
-
-const DB_USER = 'root';         // Dit is de gebruikersnaam die toegang geeft tot de database
-                               // 'root' is de standaard beheerder in XAMPP, maar in echte websites
-                               // zou je een andere gebruiker met minder rechten gebruiken
-
-const DB_PASS = '';             // Dit is het wachtwoord voor de database-gebruiker
-                               // In XAMPP is dit standaard leeg, maar in echte websites
-                               // zou je altijd een sterk wachtwoord gebruiken
+// Database configuratie gegevens
+// Deze constanten bevatten de inloggegevens voor de database en veranderen niet tijdens het gebruik
+const DB_HOST = 'localhost';    // De server waar de database draait (lokaal op deze computer)
+const DB_NAME = 'studymate_db'; // Naam van de specifieke database die we willen gebruiken
+const DB_USER = 'root';         // Gebruikersnaam voor toegang tot de database (standaard in XAMPP)
+const DB_PASS = '';             // Wachtwoord voor database toegang (leeg bij standaard XAMPP installatie)
 
 try {
-    // Nu gaan we proberen verbinding te maken met de database
-    // Het try-blok zorgt ervoor dat als er iets mis gaat, we netjes een foutmelding kunnen geven
-    
-    // Hier maken we de echte verbinding met de database
+    // Hier maken we de database verbinding met PDO (PHP Data Objects)
+    // PDO is een veilige manier om met databases te communiceren in PHP
     $pdo = new PDO(
-        // Dit is de volledige informatie voor de database-verbinding:
         "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", 
-        // ↑ Dit geeft aan: gebruik MySQL, op deze computer, deze database, en deze tekenset
-        // De tekenset (utf8mb4) zorgt dat ook speciale tekens en emoji's opgeslagen kunnen worden
+        // ↑ De connection string bevat: type database (mysql), server (localhost), 
+        // databasenaam en tekenset (utf8mb4 voor ondersteuning van speciale tekens)
         
-        DB_USER,  // Hier geven we de gebruikersnaam door
-        DB_PASS,  // Hier geven we het wachtwoord door
+        DB_USER,  // Gebruikersnaam voor de database
+        DB_PASS,  // Wachtwoord voor de database
         
-        // Deze instelling zorgt ervoor dat fouten duidelijk worden gemeld
-        // Als er iets mis gaat met een database-opdracht, krijgen we daar bericht van
+        // Deze optie zorgt ervoor dat fouten netjes als exceptions worden getoond
+        // Handig tijdens ontwikkeling om problemen snel te kunnen opsporen
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
+    // Als deze code zonder fouten uitgevoerd wordt, hebben we nu een werkende database verbinding
+    // De variabele $pdo kan nu gebruikt worden in andere bestanden voor database acties
     
 } catch (PDOException $e) {
-    // Dit deel wordt alleen uitgevoerd als er iets mis ging bij het verbinden
-    // PDOException is een speciaal soort foutmelding voor database-problemen
+    // Dit blok vangt database fouten op als de verbinding mislukt
+    // Bijvoorbeeld als de database niet bestaat of inloggegevens onjuist zijn
     
-    // Deze regel schrijft de technische foutmelding naar een logbestand
-    // Dit is handig voor de beheerder om problemen op te lossen
     error_log("Database-verbinding mislukt: " . $e->getMessage());
+    // ↑ Slaat de technische foutmelding op in het error log bestand
+    // Dit is belangrijk voor ontwikkelaars om problemen op te lossen
     
-    // Deze regel toont een vriendelijke foutmelding aan de gebruiker
-    // We laten opzettelijk geen technische details zien om veiligheidsredenen
-    // De functie 'die()' stopt de uitvoering van de website
     die("Er is een probleem met de database. Probeer het later opnieuw.");
+    // ↑ Toont een gebruiksvriendelijke foutmelding aan de bezoeker
+    // En stopt de verdere uitvoering van de code (die() functie)
 }
 
-// Als alles goed is gegaan, is de variabele $pdo nu klaar voor gebruik
-// Deze variabele wordt gebruikt in andere bestanden om gegevens op te halen of op te slaan
-// Bijvoorbeeld voor het inloggen van gebruikers of het opslaan van evenementen
+// De $pdo variabele bevat nu een actieve verbinding met de database
+// Deze variabele wordt in andere bestanden gebruikt om gegevens op te halen of op te slaan
 ?>

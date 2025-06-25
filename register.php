@@ -1,79 +1,77 @@
 <?php
 /**
- * Registratiepagina - Hier kan een nieuwe gebruiker een account aanmaken
+ * Registratiepagina - StudyMate Event Manager
  * 
- * Deze pagina doet het volgende:
- * 1. Controleren of iemand al is ingelogd (dan hoeft registreren niet meer)
- * 2. Het registratieformulier tonen met velden voor e-mail en wachtwoord
- * 3. De ingevulde gegevens controleren op juistheid
- * 4. Een nieuw account aanmaken als alles klopt
- * 5. De gebruiker doorsturen naar de inlogpagina om in te loggen met het nieuwe account
+ * Deze pagina zorgt voor de registratie van nieuwe gebruikers in het systeem.
+ * Het bevat een formulier waar gebruikers hun e-mailadres en wachtwoord kunnen invullen.
+ * Na succesvolle registratie wordt de gebruiker doorgestuurd naar de inlogpagina.
  */
 
-// We laden eerst alle hulpfuncties in die we nodig hebben
+// Importeert alle benodigde functies uit het functions.php bestand
 require_once 'functions.php';
 
-// We controleren of de gebruiker al is ingelogd
-// Als dat zo is, heeft registreren geen zin meer
-// Dan sturen we de gebruiker meteen door naar het dashboard (de hoofdpagina na inloggen)
+// Controleert of de gebruiker al is ingelogd
+// Als de gebruiker al is ingelogd, heeft registreren geen zin meer
+// De functie isLoggedIn() komt uit functions.php en controleert de sessiegegevens
 if (isLoggedIn()) {
+    // Stuurt de gebruiker door naar het dashboard als ze al zijn ingelogd
     header("Location: dashboard.php");
-    exit();
+    exit(); // Stopt de uitvoering van de rest van het script
 }
 
-// Dit deel wordt alleen uitgevoerd als het formulier is ingevuld en verzonden
-// We controleren of er op de registreerknop is geklikt
+// Dit gedeelte wordt alleen uitgevoerd als het formulier is verzonden (als er op de registreerknop is geklikt)
+// $_SERVER['REQUEST_METHOD'] controleert of het formulier via POST is verzonden
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // We halen het ingevulde e-mailadres op en maken het veilig
-    // sanitizeInput verwijdert gevaarlijke code die kwaadwillenden zouden kunnen invoeren
-    // ?? '' zorgt ervoor dat als er niets is ingevuld, we een lege tekst gebruiken
+    // Haalt het ingevulde e-mailadres op uit het formulier en maakt het veilig
+    // sanitizeInput() is een functie die schadelijke code verwijdert (bijv. om XSS-aanvallen te voorkomen)
     $email = sanitizeInput($_POST['email'] ?? '');
     
-    // We halen het ingevulde wachtwoord op
-    // We beveiligen het wachtwoord niet met sanitizeInput omdat we het gaan versleutelen
+    // Haalt het wachtwoord op uit het formulier
+    // Het wachtwoord wordt niet gesanitized omdat het later versleuteld wordt opgeslagen
     $password = $_POST['password'] ?? '';
 
-    // We controleren of het e-mailadres wel echt een e-mailadres is
-    // filter_var controleert of het e-mailadres een @ teken heeft en er goed uitziet
+    // Validatie: controleert of het e-mailadres een geldig formaat heeft
+    // filter_var met FILTER_VALIDATE_EMAIL controleert of het e-mailadres correct is opgebouwd
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        // Als het geen geldig e-mailadres is, maken we een foutmelding
+        // Als het e-mailadres ongeldig is, wordt een foutmelding ingesteld
         $error = "Ongeldig e-mailadres.";
     } 
-    // We controleren of het wachtwoord lang genoeg is (minstens 8 tekens)
-    // strlen telt het aantal tekens in het wachtwoord
+    // Validatie: controleert of het wachtwoord minimaal 8 tekens lang is
+    // strlen() telt het aantal tekens in een string
     elseif (strlen($password) < 8) {
-        // Als het wachtwoord te kort is, maken we een foutmelding
+        // Als het wachtwoord te kort is, wordt een foutmelding ingesteld
         $error = "Wachtwoord moet minimaal 8 tekens lang zijn.";
     } 
-    // Als beide controles goed zijn, gaan we het account aanmaken
+    // Als alle validaties zijn geslaagd, wordt het account aangemaakt
     else {
-        // We gebruiken try-catch om eventuele fouten netjes af te handelen
+        // try-catch blok vangt database-fouten op voor betere foutafhandeling
         try {
-            // We versleutelen het wachtwoord zodat het veilig kan worden opgeslagen
-            // Versleutelde wachtwoorden kunnen niet worden teruggelezen, maar wel worden gecontroleerd
+            // Versleutelt het wachtwoord met een one-way hash functie voor veilige opslag
+            // password_hash met PASSWORD_BCRYPT is een veilige methode om wachtwoorden te versleutelen
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
             
-            // We maken een veilige database-opdracht om de nieuwe gebruiker op te slaan
-            // De vraagtekens (?) zijn plaatshouders voor het e-mailadres en wachtwoord
+            // Voorbereidt een SQL-query om de nieuwe gebruiker in de database op te slaan
+            // Prepared statements voorkomen SQL-injecties door parameters apart te houden van de query
             $stmt = $pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
             
-            // We voeren de opdracht uit en vullen het e-mailadres en versleutelde wachtwoord in
+            // Voert de SQL-query uit met de gebruikersgegevens
+            // De vraagtekens in de query worden vervangen door de waarden in de array
             $stmt->execute([$email, $hashed_password]);
             
-            // We maken een succesmelding voor de gebruiker
-            // Deze wordt getoond op de inlogpagina
+            // Maakt een succesmelding aan die op de volgende pagina wordt getoond
+            // setFlashMessage slaat een bericht op in de sessie dat één keer wordt weergegeven
             setFlashMessage('success', 'Registratie succesvol! Log in om te beginnen.');
             
-            // We sturen de gebruiker door naar de inlogpagina om in te loggen
+            // Stuurt de gebruiker door naar de inlogpagina na succesvolle registratie
             header("Location: index.php");
             
-            // We stoppen het script hier, omdat de gebruiker toch wordt doorgestuurd
+            // Stopt de verdere uitvoering van het script
             exit();
         } 
-        // Als er iets mis gaat bij het opslaan, vangen we de fout op
+        // Vangt databasefouten op, zoals wanneer een e-mailadres al in gebruik is
         catch (PDOException $e) {
-            // De meest waarschijnlijke fout is dat het e-mailadres al bestaat
-            // We geven een duidelijke foutmelding aan de gebruiker
+            // Toont een gebruiksvriendelijke foutmelding aan de gebruiker
+            // De echte technische fout wordt niet getoond voor veiligheidsredenen
             $error = "E-mailadres bestaat al.";
         }
     }
@@ -96,8 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Navigatiebalk bovenaan de pagina -->
-    <!-- Bevat de naam van de applicatie en is altijd zichtbaar -->
+    <!-- Navigatiebalk bovenaan de pagina met de applicatienaam -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <!-- Naam van de applicatie, klikbaar logo -->
@@ -105,49 +102,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </nav>
     
-    <!-- Hoofdgedeelte van de pagina, hier komt het registratieformulier -->
+    <!-- Hoofdsectie met het registratieformulier -->
     <section class="container mt-5">
-        <!-- Titel van de sectie, groot en gecentreerd -->
         <h2 class="text-center">Registreren</h2>
         
-        <!-- Foutmelding sectie -->
-        <!-- Alleen zichtbaar als er een fout is, bijvoorbeeld bij een ongeldig e-mailadres -->
+        <!-- Toont foutmeldingen als er validatiefouten zijn -->
+        <!-- isset() controleert of de $error variabele bestaat -->
         <?php if (isset($error)): ?>
             <p class="text-danger text-center"><?php echo $error; ?></p>
         <?php endif; ?>
         
-        <!-- Registratieformulier -->
-        <!-- Het formulier is gecentreerd met Bootstrap klassen en wordt via POST verzonden -->
+        <!-- Registratieformulier dat gegevens via POST naar dezelfde pagina stuurt -->
         <form method="POST" class="col-md-6 mx-auto">
-            <!-- E-mailadres invoerveld -->
-            <!-- Het veld behoudt de ingevoerde waarde bij validatiefouten, met XSS-bescherming via htmlspecialchars -->
+            <!-- E-mail invoerveld met label -->
+            <!-- Bij validatiefouten blijft de eerder ingevoerde waarde behouden -->
+            <!-- htmlspecialchars() voorkomt XSS-aanvallen door speciale tekens om te zetten -->
             <div class="mb-3">
                 <label for="email" class="form-label">E-mail</label>
                 <input type="email" class="form-control" id="email" name="email" value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>" required>
             </div>
             
-            <!-- Wachtwoord invoerveld -->
-            <!-- Type password zorgt ervoor dat het wachtwoord verborgen wordt tijdens het typen -->
+            <!-- Wachtwoord invoerveld met label -->
+            <!-- Type="password" zorgt ervoor dat het wachtwoord als stippen wordt weergegeven -->
             <div class="mb-3">
                 <label for="password" class="form-label">Wachtwoord</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             
-            <!-- Registratie-knop -->
-            <!-- De knop is groen (success) en neemt de volledige breedte in (w-100) -->
+            <!-- Registratieknop die het formulier verstuurt -->
             <button type="submit" class="btn btn-success w-100">Registreren</button>
             
-            <!-- Link terug naar de inlogpagina -->
+            <!-- Link terug naar de inlogpagina voor gebruikers die al een account hebben -->
             <p class="mt-2 text-center"><a href="index.php">Terug naar inloggen</a></p>
         </form>
     </section>
     
-    <!-- Voettekst van de pagina -->
+    <!-- Voettekst met copyright informatie -->
     <footer class="bg-dark text-white text-center py-3 mt-5">
         <p>© 2025 StudyMate Event Manager</p>
     </footer>
     
-    <!-- JavaScript-bestanden voor interactiviteit -->
+    <!-- JavaScript bestanden voor interactiviteit -->
     <!-- Bootstrap JavaScript voor responsieve componenten -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     

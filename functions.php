@@ -15,70 +15,88 @@ require_once 'db_connect.php';
 /**
  * Controleert of een gebruiker momenteel is ingelogd
  * 
- * Deze functie controleert of er een geldige user_id aanwezig is in de sessie,
- * wat aangeeft dat een gebruiker succesvol is ingelogd.
+ * Deze functie kijkt in de sessie of er een gebruiker-ID aanwezig is.
+ * Als er een ID gevonden wordt, betekent dit dat iemand is ingelogd.
+ * De sessie werkt als een tijdelijk geheugen dat bewaard blijft terwijl 
+ * de gebruiker door de website navigeert.
  * 
  * @return bool - True als de gebruiker is ingelogd, anders False
  */
 function isLoggedIn(): bool {
+    // Controleert of 'user_id' bestaat in de sessie EN of deze niet leeg is
+    // Zo ja, dan is de gebruiker ingelogd en geeft de functie 'true' terug
+    // Zo nee, dan is niemand ingelogd en geeft de functie 'false' terug
     return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
 }
 
 /**
  * Vereist dat een gebruiker is ingelogd om de pagina te bekijken
  * 
- * Deze functie stuurt de gebruiker door naar de inlogpagina als ze niet 
- * zijn ingelogd. Dit beveiligt pagina's die alleen voor ingelogde gebruikers
- * toegankelijk mogen zijn.
- * 
- * @return void - Functie geeft niets terug, maar kan de gebruiker doorsturen
+ * Deze functie beschermt pagina's die alleen voor ingelogde gebruikers bedoeld zijn.
+ * Als iemand niet is ingelogd, wordt deze automatisch doorgestuurd naar de inlogpagina.
+ * Dit voorkomt dat onbevoegden toegang krijgen tot beveiligde delen van de website.
  */
 function requireLogin(): void {
+    // Controleert eerst of de gebruiker NIET is ingelogd door de isLoggedIn functie te gebruiken
     if (!isLoggedIn()) {
+        // Als de gebruiker niet is ingelogd, stuur dan door naar de inlogpagina (index.php)
         header("Location: index.php");
+        // Stop direct met het uitvoeren van de rest van de code
+        // Dit is belangrijk voor de veiligheid: er wordt geen enkele code meer uitgevoerd
         exit();
     }
+    // Als de gebruiker WEL is ingelogd, gebeurt er niets en gaat de code gewoon verder
 }
 
 /**
- * Valideert en reinigt gebruikersinvoer voor veilige verwerking
+ * Maakt invoer van gebruikers veilig voor gebruik in de website
  * 
- * Deze functie voorkomt XSS-aanvallen (Cross-Site Scripting) door speciale
- * tekens om te zetten naar HTML-entiteiten en overbodige spaties te verwijderen.
- * Altijd gebruiken bij het verwerken van gebruikersinvoer!
+ * Deze functie beschermt tegen hackers die proberen code in te voeren.
+ * Alle speciale tekens (zoals < > " ') worden omgezet naar veilige HTML-codes.
+ * Ook worden onnodige spaties aan het begin en einde verwijderd.
  * 
- * @param string $data - De ruwe gebruikersinvoer die moet worden opgeschoond
- * @return string - De opgeschoonde en veilige invoergegevens
+ * Gebruik deze functie ALTIJD wanneer je informatie van gebruikers verwerkt!
+ * 
+ * @param string $data - De tekst die de gebruiker heeft ingevoerd
+ * @return string - De opgeschoonde, veilige versie van de invoer
  */
 function sanitizeInput(string $data): string {
+    // trim() verwijdert spaties aan begin en einde van de tekst
+    // htmlspecialchars() zet gevaarlijke tekens om in veilige HTML-codes
+    // ENT_QUOTES zorgt ervoor dat zowel dubbele als enkele aanhalingstekens worden omgezet
+    // UTF-8 is de tekencodering die we gebruiken voor internationale tekens
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
 
 /**
- * Genereert een veilige, willekeurige token voor wachtwoordresets
+ * Maakt een veilige, willekeurige code voor wachtwoord-reset links
  * 
- * Deze functie creëert een unieke, cryptografisch veilige token die wordt
- * gebruikt voor het proces van wachtwoordreset. De token is 32 tekens lang
- * en bestaat uit hexadecimale tekens.
+ * Deze functie genereert een unieke code die gebruikt wordt in e-mails
+ * voor het resetten van wachtwoorden. De code is zeer moeilijk te raden
+ * omdat deze volledig willekeurig wordt gemaakt met speciale beveiligingsmethoden.
  * 
- * @return string - Een unieke token voor wachtwoordreset
+ * @return string - Een unieke code van 32 tekens die niet te voorspellen is
  */
 function generateResetToken(): string {
+    // random_bytes(16) maakt 16 willekeurige bytes aan met cryptografische veiligheid
+    // bin2hex zet deze bytes om in een leesbare tekst van hexadecimale tekens (0-9, a-f)
+    // Het resultaat is een token van 32 tekens die extreem moeilijk te raden is
     return bin2hex(random_bytes(16));
 }
 
 /**
- * Maakt een tijdelijke melding aan die één keer aan de gebruiker wordt getoond
+ * Slaat een tijdelijk bericht op om aan de gebruiker te tonen
  * 
- * Deze functie slaat een bericht op in de sessie dat op de volgende pagina
- * kan worden weergegeven en daarna automatisch wordt verwijderd. Handig voor
- * bevestigings- of foutmeldingen na formulierinzendingen.
+ * Deze functie maakt het mogelijk om berichten ('Gelukt!', 'Fout!', etc.)
+ * op te slaan die maar één keer getoond worden op de volgende pagina.
+ * Dit is handig voor bijvoorbeeld bevestigingen na het opslaan van gegevens.
  * 
- * @param string $type - Het type bericht ('success', 'danger', 'warning', etc.)
- * @param string $message - De inhoud van het bericht dat moet worden getoond
- * @return void - Functie slaat het bericht op maar geeft niets terug
+ * @param string $type - Soort bericht ('success', 'danger', 'warning', etc.)
+ * @param string $message - De tekst van het bericht zelf
  */
 function setFlashMessage(string $type, string $message): void {
+    // Slaat in de sessie een array op met het type bericht en de boodschap zelf
+    // Deze informatie blijft bewaard tot de gebruiker naar een andere pagina gaat
     $_SESSION['flash'] = ['type' => $type, 'message' => $message];
 }
 

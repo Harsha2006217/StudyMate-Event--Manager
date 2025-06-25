@@ -2,62 +2,63 @@
 /**
  * Evenement Bewerken Script
  * 
- * Dit script zorgt ervoor dat gebruikers hun eigen evenementen kunnen bewerken.
- * Het bevat zowel de logica voor het ophalen en bijwerken van evenementgegevens
- * als het formulier voor het weergeven en bewerken van deze gegevens.
+ * Dit script maakt het mogelijk voor gebruikers om hun eigen evenementen aan te passen.
+ * Het bevat zowel de verwerkingslogica als het formulier om de gegevens te wijzigen.
+ * Beveiliging is ingebouwd zodat gebruikers alleen hun eigen evenementen kunnen bewerken.
  */
 
-// Laad de benodigde functies en controleer of de gebruiker is ingelogd
+// Laadt hulpfuncties en databaseverbinding, controleert of de gebruiker is ingelogd
 require_once 'functions.php';
 requireLogin();
 
-// Haal het evenement-ID op uit de URL en valideer of het een geldig geheel getal is
+// Haalt het evenement-ID uit de URL en controleert of het een geldig geheel getal is
+// Dit voorkomt SQL-injectie door ongeldige invoer te filteren
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if ($id === false || $id === null) {
-    // Stop de uitvoering als het ID ongeldig is en toon een foutmelding
     die("Ongeldig evenement-ID.");
 }
 
-// Haal het evenement op uit de database
-// De WHERE-clausule met user_id zorgt ervoor dat gebruikers alleen hun eigen evenementen kunnen bewerken
+// Haalt evenementgegevens op uit de database, maar alleen als het van de ingelogde gebruiker is
+// Dit is een beveiligingsmaatregel die voorkomt dat gebruikers andermans evenementen kunnen wijzigen
 $stmt = $pdo->prepare("SELECT * FROM events WHERE id = ? AND user_id = ?");
 $stmt->execute([$id, $_SESSION['user_id']]);
 $event = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Controleer of het evenement bestaat en van de huidige gebruiker is
+// Controleert of het evenement bestaat en van de huidige gebruiker is
 if (!$event) {
-    // Stop de uitvoering als het evenement niet gevonden wordt
     die("Evenement niet gevonden.");
 }
 
-// Definieer de beschikbare categorieën voor evenementen
+// Definieert de beschikbare categorieën voor evenementen in een associatieve array
+// De sleutel wordt in de database opgeslagen, de waarde wordt getoond aan de gebruiker
 $categories = ['school' => 'School', 'sociaal' => 'Sociaal', 'gaming' => 'Gaming'];
 
-// Verwerk het formulier wanneer het wordt verzonden
+// Verwerkt het formulier wanneer het wordt verzonden (POST-methode)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Haal de formuliergegevens op en beveilig ze
+    // Haalt alle formuliergegevens op en past beveiliging toe waar nodig
+    // sanitizeInput verwijdert potentieel gevaarlijke tekens voor veilige verwerking
     $title = sanitizeInput($_POST['title']);
     $date = $_POST['date'];
     $time = $_POST['time'];
     $category = $_POST['category'];
     
-    // Controleer of de herinneringsoptie is aangevinkt
+    // Bepaalt of de herinneringsoptie is aangevinkt (1 = ja, 0 = nee)
+    // Als herinnering niet is aangevinkt, wordt de herinneringstijd op null gezet
     $reminder = isset($_POST['reminder']) ? 1 : 0;
     $reminder_time = $reminder ? $_POST['reminder_time'] : null;
 
-    // Valideer de ingevoerde gegevens
+    // Valideert de ingevoerde gegevens voordat ze worden opgeslagen
     if (empty($title)) {
-        // Controleer of een titel is opgegeven
         $error = "Titel is verplicht.";
     } elseif (!array_key_exists($category, $categories)) {
-        // Controleer of de gekozen categorie geldig is
         $error = "Ongeldige categorie.";
     } else {
-        // Alle validaties zijn succesvol, werk het evenement bij in de database
+        // Als alle gegevens geldig zijn, wordt het evenement bijgewerkt in de database
+        // De voorbereidde statement (prepare) beschermt tegen SQL-injectie
         $stmt = $pdo->prepare("UPDATE events SET title = ?, date = ?, time = ?, category = ?, reminder = ?, reminder_time = ? WHERE id = ?");
         $stmt->execute([$title, $date, $time, $category, $reminder, $reminder_time, $id]);
         
-        // Stel een succesmelding in en stuur de gebruiker terug naar het dashboard
+        // Slaat een succesmelding op en stuurt de gebruiker terug naar het dashboard
         setFlashMessage('success', "Evenement '$title' succesvol bijgewerkt!");
         header("Location: dashboard.php");
         exit();

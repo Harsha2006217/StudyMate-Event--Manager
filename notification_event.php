@@ -23,13 +23,36 @@ requireLogin();
 // - Gesorteerd op datum en tijd, zodat de eerstvolgende bovenaan staan
 $stmt = $pdo->prepare("SELECT * FROM events WHERE user_id = ? AND reminder = 1 AND date >= CURDATE() ORDER BY date, time");
 
+/**
+ * Hierboven maken we een voorbereide SQL-query (prepared statement) om veilig gegevens uit de database te halen.
+ * Dit beschermt tegen SQL-injectie aanvallen omdat de gebruikersgegevens (?-symbool) apart worden verwerkt.
+ * We selecteren alleen evenementen die:
+ *   - horen bij de ingelogde gebruiker
+ *   - waar herinneringen voor zijn ingesteld (reminder = 1)
+ *   - die vanaf vandaag plaatsvinden (niet in het verleden)
+ * De resultaten worden gesorteerd op datum en tijd zodat de eerstkomende bovenaan staan.
+ */
+
 // Nu voeren we de zoekopdracht uit
 // We vullen op de plaats van ? jouw gebruikers-ID in (opgeslagen toen je inlogde)
 $stmt->execute([$_SESSION['user_id']]);
 
+/**
+ * Hier voeren we de query daadwerkelijk uit met execute().
+ * We geven de gebruikers-ID mee die is opgeslagen in de sessie toen de gebruiker inlogde.
+ * De sessie is een veilige manier om gebruikersgegevens tijdelijk op te slaan tijdens het browsen.
+ */
+
 // Hier halen we alle gevonden evenementen op en zetten ze in de variabele $events
 // Ze komen binnen als een lijst met alle informatie over elk evenement
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+/**
+ * Met fetchAll() halen we alle resultaten op uit de database en slaan deze op in $events.
+ * PDO::FETCH_ASSOC zorgt ervoor dat we de resultaten krijgen als een associatieve array,
+ * waarbij elke rij uit de database een array wordt met kolomnamen als indices.
+ * Bijvoorbeeld: $events[0]['title'] geeft de titel van het eerste evenement.
+ */
 
 // Stap 3: Voorbereiden van de gegevens voor weergave op het scherm
 // We maken een lege lijst waar we alle herinneringen in gaan zetten
@@ -50,6 +73,15 @@ foreach ($events as $event) {
         'reminder_time' => $event['reminder_time']
     ];
 }
+
+/**
+ * In deze foreach-lus verwerken we elk evenement uit de database:
+ * 1. We beginnen met een lege array voor notificaties
+ * 2. Voor elk evenement maken we een nieuwe entry in de notificaties-array
+ * 3. We gebruiken htmlspecialchars() bij de titel om XSS-aanvallen te voorkomen
+ *    (dit voorkomt dat kwaadwillende code in titels wordt uitgevoerd in de browser)
+ * 4. We slaan alleen de informatie op die we daadwerkelijk willen tonen op de pagina
+ */
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -105,6 +137,16 @@ foreach ($events as $event) {
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
+
+        /**
+         * Dit is het belangrijkste gedeelte van de weergave:
+         * 1. We controleren eerst of er notificaties zijn met empty()
+         * 2. Als er geen notificaties zijn, tonen we een bericht "Geen notificaties beschikbaar"
+         * 3. Anders doorlopen we met foreach alle notificaties en maken we voor elke notificatie
+         *    een lijst-item met de titel, datum, tijd en herinneringstijd
+         * 4. De conditie if-else met de speciale syntax (:) en (endif;) is een alternatieve
+         *    PHP-syntax die handig is in HTML-templates
+         */
     </section>
     
     <!-- Voettekst van de pagina -->

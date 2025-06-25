@@ -32,133 +32,114 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <!-- Deze regels geven informatie aan de browser over hoe de pagina moet worden weergegeven -->
-    
-    <!-- Deze regel zorgt ervoor dat speciale tekens (zoals é, ö, ç) goed worden weergegeven -->
+    <!-- Metadata voor goede weergave en karaktercodering -->
     <meta charset="UTF-8">
     
-    <!-- Deze regel zorgt ervoor dat de pagina goed werkt op mobiele telefoons -->
-    <!-- Het past de grootte van de website aan aan de grootte van het scherm -->
+    <!-- Maakt de webpagina responsief voor verschillende schermformaten -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- De titel die bovenaan in het browsertabblad wordt weergegeven -->
     <title>StudyMate - Kalender</title>
     
-    <!-- Hieronder laden we de opmaakbestanden (CSS) in die bepalen hoe de website eruitziet -->
-    
-    <!-- Dit is ons eigen opmaakbestand waar we speciale stijlen hebben gemaakt voor onze website -->
+    <!-- Eigen stylesheet voor aangepaste opmaak -->
     <link rel="stylesheet" href="style.css">
     
-    <!-- Dit is een extern opmaakbestand (Bootstrap) dat veel kant-en-klare stijlen bevat -->
-    <!-- We gebruiken dit om de website er snel mooi uit te laten zien zonder veel eigen code te schrijven -->
+    <!-- Bootstrap CSS voor layout en standaard stijlen -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Dit is de navigatiebalk (menu) bovenaan de pagina -->
-    <!-- navbar-dark bg-dark zorgt voor een donkere balk met lichte tekst -->
-    <!-- navbar-expand-lg zorgt ervoor dat het menu uitklapt op grote schermen -->
+    <!-- Navigatiebalk met menuopties voor de gebruiker -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <!-- Dit is de naam/logo van de website links in de navigatiebalk -->
-            <!-- De naam is ook een link naar de startpagina (als je erop klikt) -->
-            <!-- navbar-brand is een speciale stijl die de tekst groter en opvallender maakt -->
+            <!-- Logo/merknaam als link naar de hoofdpagina -->
             <a class="navbar-brand" href="#">StudyMate</a>
             
-            <!-- Dit is de knop voor het mobiele menu (hamburger menu) -->
-            <!-- Als je op deze knop klikt, opent of sluit het menu op kleine schermen -->
-            <!-- data-bs-toggle en data-bs-target zijn speciale gegevens-attributen voor Bootstrap -->
+            <!-- Hamburger menu knop voor mobiele weergave -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
-            <!-- Dit is de lijst met menu-items die verschijnen als je op het mobiele menu klikt -->
+            <!-- Navigatiemenu met links naar verschillende pagina's -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <!-- Elke regel hieronder is een menu-item -->
-                    <!-- class="nav-item" is een speciale stijl voor de menu-items -->
-                    <!-- class="nav-link" is een speciale stijl voor de links in het menu -->
-                    <!-- href="dashboard.php" is de link naar de startpagina van de gebruiker -->
+                    <!-- Menu-items met links naar andere pagina's -->
                     <li class="nav-item"><a class="nav-link" href="dashboard.php">Home</a></li>
-                    <!-- href="add_event.php" is de link naar de pagina om een nieuw evenement toe te voegen -->
                     <li class="nav-item"><a class="nav-link" href="add_event.php">Evenement toevoegen</a></li>
-                    <!-- href="kalender_event.php" is de link naar deze kalenderpagina -->
-                    <!-- class="active" zorgt ervoor dat dit menu-item gemarkeerd is als je op deze pagina bent -->
                     <li class="nav-item"><a class="nav-link active" href="kalender_event.php">Kalender</a></li>
-                    <!-- href="logout.php" is de link om uit te loggen -->
                     <li class="nav-item"><a class="nav-link" href="logout.php">Uitloggen</a></li>
                 </ul>
             </div>
         </div>
     </nav>
     
-    <!-- Dit is het hoofdgedeelte van de pagina waar de kalender wordt weergegeven -->
-    <!-- container zorgt voor een nette uitlijning en ruimte rondom de inhoud -->
-    <!-- mt-5 voegt een marge van 5 eenheden toe aan de bovenkant (top) van de container -->
+    <!-- Hoofdgedeelte: kalenderweergave container -->
     <section class="container mt-5">
-        <!-- Dit is de titel van de pagina, groot en gecentreerd -->
+        <!-- Titel van de kalenderpagina -->
         <h2 class="text-center">Kalender</h2>
         
-        <!-- Dit is de container waar de kalender in komt te staan -->
-        <!-- row zorgt voor een rasterindeling (grid) voor de kalenderdagen -->
+        <!-- Container waarin de kalender dynamisch wordt gegenereerd via JavaScript -->
         <div id="calendar" class="row"></div>
     </section>
     
-    <!-- Dit is de voettekst onderaan de pagina -->
-    <!-- bg-dark maakt de achtergrond donker -->
-    <!-- text-white maakt de tekst wit -->
-    <!-- text-center centreert de tekst -->
-    <!-- py-3 voegt wat ruimte (padding) toe boven en onder de tekst -->
-    <!-- mt-5 voegt een marge van 5 eenheden toe aan de bovenkant (top) van de voettekst -->
+    <!-- Footer met copyright informatie -->
     <footer class="bg-dark text-white text-center py-3 mt-5">
-        <!-- Dit is het copyright-bericht onderaan de pagina -->
         <p>© 2025 StudyMate Event Manager</p>
     </footer>
     
-    <!-- Hieronder laden we de JavaScript-bestanden die nodig zijn voor de website om te functioneren -->
-    
-    <!-- Dit is een extern JavaScript-bestand (Bootstrap) dat veel kant-en-klare functionaliteiten bevat -->
-    <!-- We gebruiken dit voor dingen zoals het mobiele menu en andere interactieve onderdelen -->
+    <!-- Bootstrap JavaScript voor interactieve functies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Dit is een extern JavaScript-bestand (GSAP) voor geavanceerde animaties -->
-    <!-- We gebruiken dit om mooie animaties te maken voor de kalender en andere onderdelen -->
+    <!-- GSAP bibliotheek voor animatie-effecten -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     
-    <!-- Dit is ons eigen JavaScript-gedeelte waar we de kalender dynamisch maken met code -->
+    <!-- JavaScript code voor het genereren van de kalender -->
     <script>
-        // Zet PHP-array met evenementen om naar JavaScript-array
+        // Zet PHP-array met evenementen om naar JavaScript-array voor gebruik in de browser
+        // json_encode zet de PHP-gegevens om naar JSON-formaat dat JavaScript kan begrijpen
         const events = <?php echo json_encode($events); ?>;
         
-        // Verkrijg referentie naar de kalender container
+        // Selecteer het HTML-element waar de kalender in moet komen
         const calendar = document.getElementById('calendar');
         
-        // Bepaal de huidige datum en het aantal dagen in de huidige maand
+        // Maak een object aan met de huidige datum (vandaag)
+        // Dit wordt gebruikt om de juiste maand weer te geven
         const today = new Date();
+        
+        // Bereken hoeveel dagen de huidige maand heeft
+        // We maken een datum voor de 0e dag van de volgende maand (wat eigenlijk de laatste dag van de huidige maand is)
         const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
 
-        // Loop door elke dag van de maand om kalender te genereren
+        // Loop door alle dagen van de maand om de kalender op te bouwen
         for (let i = 1; i <= daysInMonth; i++) {
-            // Maak een div-element voor elke dag
+            // Maak voor elke dag een apart HTML-element aan
             const dayDiv = document.createElement('div');
+            // Geef dit element CSS-klassen voor opmaak (Bootstrap grid-systeem)
             dayDiv.className = 'col-2 p-2 border';
+            // Zet het dagnummer in het element als dikgedrukte tekst
             dayDiv.innerHTML = `<strong>${i}</strong>`;
 
-            // Controleer voor elke dag of er evenementen zijn
+            // Doorzoek alle evenementen om te kijken welke op deze dag plaatsvinden
             events.forEach(event => {
+                // Maak een Date-object van de evenementdatum voor vergelijking
                 const eventDate = new Date(event.date);
-                // Als het evenement op deze dag van de huidige maand valt, voeg het toe
+                
+                // Controleer of het evenement op de huidige dag én in de huidige maand valt
                 if (eventDate.getDate() === i && eventDate.getMonth() === today.getMonth()) {
+                    // Maak een nieuw element voor dit evenement
                     const eventDiv = document.createElement('div');
+                    // Voeg CSS-klassen toe voor opmaak, inclusief categorie-specifieke kleur
                     eventDiv.className = `event ${event.category}`;
+                    // Toon tijd en titel van het evenement
                     eventDiv.textContent = `${event.time} - ${event.title}`;
+                    // Voeg het evenement toe aan de dag
                     dayDiv.appendChild(eventDiv);
                 }
             });
 
-            // Voeg de dag toe aan de kalender
+            // Voeg de complete dag toe aan de kalender
             calendar.appendChild(dayDiv);
             
-            // Voeg een mooie animatie toe met GSAP
+            // Voeg een vloeiende verschijningsanimatie toe met GSAP
+            // Elke dag verschijnt met een kleine vertraging na de vorige (i * 0.05)
             gsap.from(dayDiv, { opacity: 0, y: 20, duration: 0.5, delay: i * 0.05 });
         }
     </script>
