@@ -1,56 +1,39 @@
 <?php
 /**
  * "Wachtwoord Vergeten" Pagina
- * 
- * Dit bestand zorgt ervoor dat gebruikers die hun wachtwoord zijn vergeten een nieuw wachtwoord 
- * kunnen aanvragen. De gebruiker vult zijn e-mailadres in, en dan wordt er een speciale link
- * gemaakt waarmee het wachtwoord opnieuw kan worden ingesteld.
- * 
- * In een echte website zou er een e-mail worden verstuurd, maar hier laten we gewoon de link zien.
+ * Dit bestand biedt gebruikers de mogelijkheid om een wachtwoord reset aan te vragen.
+ * Het genereert een unieke resetlink en toont deze aan de gebruiker.
  */
 
-// Importeren van benodigde functies uit functions.php
-// Dit is essentieel voor de werking van de wachtwoord reset functionaliteit
-require_once 'functions.php';
+// Importeren van functies uit functions.php
+require_once 'functions.php'; // Zorgt ervoor dat alle benodigde functies beschikbaar zijn.
 
-// Beveiligingsmaatregel: Controleert of de gebruiker al is ingelogd
-// Als de gebruiker al ingelogd is, heeft deze geen wachtwoord reset nodig
-// De isLoggedIn() functie controleert de sessie op een geldig gebruiker-ID
+// Controleert of de gebruiker al is ingelogd
 if (isLoggedIn()) {
-    // Redirect naar dashboard om gebruiker naar zijn persoonlijke omgeving te sturen
-    // Dit voorkomt onnodige wachtwoord resets voor ingelogde gebruikers
+    // Als de gebruiker ingelogd is, wordt hij doorgestuurd naar het dashboard.
     header("Location: dashboard.php");
-    // Exit zorgt ervoor dat de rest van de code niet wordt uitgevoerd
-    // Dit is belangrijk voor de beveiliging, omdat anders de code hieronder alsnog zou kunnen worden uitgevoerd
-    exit();
+    exit(); // Voorkomt dat de rest van de code wordt uitgevoerd.
 }
 
-// Verwerking van het formulier wanneer gebruiker op "Resetlink aanvragen" drukt
-// REQUEST_METHOD === 'POST' betekent dat het formulier is verzonden
+// Controleert of het formulier is verzonden
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Opvangen en opschonen van het ingevoerde e-mailadres
-    // sanitizeInput() verwijdert mogelijk schadelijke code uit de invoer (XSS-preventie)
-    $email = sanitizeInput($_POST['email']);
-    
-    // Genereren van een unieke reset-token voor deze specifieke wachtwoord reset
-    // Deze token zal in de database worden opgeslagen en in de resetlink worden gebruikt
-    $token = generateResetToken();
-    
-    // Instellen van een verloopdatum voor de token (1 uur vanaf nu)
-    // Deze tijdslimiet is een beveiligingsmaatregel om misbruik van oude resetlinks te voorkomen
-    $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+    // Haalt het ingevoerde e-mailadres op en maakt het veilig tegen XSS-aanvallen.
+    $email = sanitizeInput($_POST['email']); // sanitizeInput() verwijdert schadelijke code.
 
-    // Database update: sla de token en verloopdatum op bij de juiste gebruiker
-    // Prepared statement wordt gebruikt om SQL-injectie aanvallen te voorkomen
+    // Genereert een unieke token voor de wachtwoord reset.
+    $token = generateResetToken(); // Deze token wordt later gebruikt in de resetlink.
+
+    // Stelt een verloopdatum in voor de token (1 uur vanaf nu).
+    $expiry = date('Y-m-d H:i:s', strtotime('+1 hour')); // Zorgt ervoor dat de link niet onbeperkt geldig is.
+
+    // Update de database met de reset-token en de verloopdatum.
     $stmt = $pdo->prepare("UPDATE users SET reset_token = ?, reset_expiry = ? WHERE email = ?");
-    $stmt->execute([$token, $expiry, $email]);
+    $stmt->execute([$token, $expiry, $email]); // Voorkomt SQL-injectie door gebruik van prepared statements.
 
-    // Bevestiging naar de gebruiker dat de resetlink is verzonden
-    // In een productieomgeving zou hier een echte e-mail worden verzonden
-    // setFlashMessage slaat een bericht op dat op de volgende pagina wordt getoond
+    // Geeft een succesbericht aan de gebruiker.
     setFlashMessage('success', "Controleer je e-mail voor de resetlink (simulatie: reset_password.php?token=$token).");
-    
-    // Na succesvol aanmaken van de reset-token wordt de gebruiker teruggestuurd naar de inlogpagina
+
+    // Redirect naar de inlogpagina na het verwerken van het formulier.
     header("Location: index.php");
     exit();
 }
@@ -63,45 +46,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyMate - Wachtwoord vergeten</title>
     
-    <!-- Externe CSS-bestanden voor consistent ontwerp door de hele applicatie -->
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CSS-bestanden voor styling -->
+    <link rel="stylesheet" href="style.css"> <!-- Algemene styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> <!-- Bootstrap voor responsief ontwerp -->
 </head>
 <body>
-    <!-- Navigatiebalk met alleen de applicatienaam voor eenvoudige navigatie -->
+    <!-- Navigatiebalk -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">StudyMate</a>
+            <a class="navbar-brand" href="#">StudyMate</a> <!-- Applicatienaam -->
         </div>
     </nav>
     
-    <!-- Hoofdgedeelte met het wachtwoord reset formulier -->
+    <!-- Hoofdgedeelte met het formulier -->
     <section class="container mt-5">
         <h2 class="text-center">Wachtwoord vergeten</h2>
         
-        <!-- Formulier dat bij verzending een POST-verzoek stuurt naar dezelfde pagina -->
+        <!-- Formulier voor het aanvragen van een resetlink -->
         <form method="POST" class="col-md-6 mx-auto">
-            <!-- E-mailadres invoerveld met required attribuut om lege inzendingen te voorkomen -->
+            <!-- E-mailadres invoerveld -->
             <div class="mb-3">
                 <label for="email" class="form-label">E-mail</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <input type="email" class="form-control" id="email" name="email" required> <!-- 'required' zorgt ervoor dat het veld niet leeg kan worden verzonden -->
             </div>
             
-            <!-- Verzendknop voor het formulier met duidelijke actie-omschrijving -->
+            <!-- Verzendknop -->
             <button type="submit" class="btn btn-primary w-100">Resetlink aanvragen</button>
             
-            <!-- Terugkeeroptie voor gebruikers die zich hun wachtwoord toch herinneren -->
+            <!-- Link terug naar de inlogpagina -->
             <p class="mt-2 text-center"><a href="index.php">Terug naar inloggen</a></p>
         </form>
     </section>
     
-    <!-- Footer met copyright informatie voor consistente pagina-afsluiting -->
+    <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3 mt-5">
-        <p>© 2025 StudyMate Event Manager</p>
+        <p>© 2025 StudyMate Event Manager</p> <!-- Copyright informatie -->
     </footer>
     
-    <!-- JavaScript-bestanden voor interactieve elementen en Bootstrap-functionaliteit -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <!-- JavaScript-bestanden -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> <!-- Bootstrap functionaliteit -->
+    <script src="script.js"></script> <!-- Algemene scripts -->
 </body>
 </html>

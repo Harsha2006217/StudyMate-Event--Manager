@@ -8,51 +8,43 @@
  */
 
 // Laad de benodigde functies
-require_once 'functions.php';
+require_once 'functions.php'; // Dit zorgt ervoor dat alle functies uit 'functions.php' beschikbaar zijn.
 
 // Controleer of de gebruiker al is ingelogd; stuur door naar dashboard indien ja
-if (isLoggedIn()) {
-    // Als de gebruiker al is ingelogd, sturen we hem direct door naar het dashboard
-    // Dit voorkomt dat ingelogde gebruikers opnieuw moeten inloggen
-    header("Location: dashboard.php");
-    exit();
+if (isLoggedIn()) { 
+    // Controleert of de gebruiker een actieve sessie heeft. Zo ja, dan wordt hij doorgestuurd naar het dashboard.
+    header("Location: dashboard.php"); // Verwijst de gebruiker naar het dashboard.
+    exit(); // Stopt verdere uitvoering van de code.
 }
 
-// Dit blok verwerkt het inlogformulier wanneer de gebruiker op de inlogknop klikt
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // We halen hier het e-mailadres veilig op uit het formulier
-    // sanitizeInput() verwijdert gevaarlijke karakters om hackers tegen te houden
-    $email = sanitizeInput($_POST['email']);
-    
-    // Het wachtwoord wordt ongewijzigd opgehaald omdat we het later vergelijken met
-    // de versleutelde versie in de database. Beveiliging gebeurt via password_verify
-    $password = $_POST['password'];
+// Verwerk het inlogformulier wanneer de gebruiker op de inlogknop klikt
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
+    // Controleert of het formulier is verzonden via de POST-methode.
 
-    // Hier maken we een veilige databasevraag om de gebruiker op te halen
-    // Door prepare() en execute() te gebruiken, beschermen we tegen SQL-injectie aanvallen
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-    
-    // Haal de gebruikersgegevens op als die bestaan in de database
-    // Als het e-mailadres niet bestaat, zal $user 'false' zijn
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $email = sanitizeInput($_POST['email']); 
+    // Haalt het ingevoerde e-mailadres op en maakt het veilig tegen schadelijke invoer.
 
-    // Controleer of de gebruiker bestaat EN het wachtwoord correct is
-    // password_verify vergelijkt het ingevoerde wachtwoord met de versleutelde hash in de database
-    if ($user && password_verify($password, $user['password'])) {
-        // Bij correcte gegevens slaan we de gebruikers-ID op in de sessie
-        // Hierdoor blijft de gebruiker ingelogd tijdens het browsen op de site
-        $_SESSION['user_id'] = $user['id'];
-        
-        // Stuur de gebruiker door naar het dashboard na succesvol inloggen
-        header("Location: dashboard.php");
-        exit();
+    $password = $_POST['password']; 
+    // Haalt het ingevoerde wachtwoord op. Dit wordt later vergeleken met de versleutelde versie in de database.
+
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?"); 
+    // Bereidt een SQL-query voor om de gebruiker op te halen op basis van het e-mailadres.
+    $stmt->execute([$email]); 
+    // Voert de query uit met het opgegeven e-mailadres.
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC); 
+    // Haalt de gegevens van de gebruiker op als deze bestaat. Anders is $user 'false'.
+
+    if ($user && password_verify($password, $user['password'])) { 
+        // Controleert of de gebruiker bestaat en of het wachtwoord correct is.
+        $_SESSION['user_id'] = $user['id']; 
+        // Slaat de gebruikers-ID op in de sessie om de gebruiker ingelogd te houden.
+        header("Location: dashboard.php"); 
+        // Verwijst de gebruiker naar het dashboard na succesvol inloggen.
+        exit(); 
     } else {
-        // Bij onjuiste gegevens tonen we een algemene foutmelding
-        // We vermelden bewust niet of het e-mailadres of wachtwoord fout is
-        // Dit is een beveiligingsmaatregel tegen aanvallen waarbij iemand probeert te achterhalen
-        // welke e-mailadressen in de database staan
-        $error = "Ongeldige e-mail of wachtwoord.";
+        $error = "Ongeldige e-mail of wachtwoord."; 
+        // Geeft een algemene foutmelding bij onjuiste gegevens.
     }
 }
 ?>
@@ -60,66 +52,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="nl">
 <head>
     <!-- Meta-informatie voor correcte weergave en responsiviteit -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyMate - Inloggen</title>
-    
+    <meta charset="UTF-8"> <!-- Stelt de tekencodering in op UTF-8. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Zorgt voor een responsieve weergave. -->
+    <title>StudyMate - Inloggen</title> <!-- Titel van de pagina. -->
+
     <!-- CSS-bestanden voor de opmaak van de pagina -->
-    <!-- We gebruiken zowel eigen CSS (style.css) als Bootstrap voor een professionele uitstraling -->
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> <!-- Link naar de eigen CSS-bestand. -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+    <!-- Link naar Bootstrap CSS voor een professionele uitstraling. -->
 </head>
 <body>
     <!-- Navigatiebalk met de applicatienaam -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">StudyMate</a>
+            <a class="navbar-brand" href="#">StudyMate</a> <!-- Link naar de homepage. -->
         </div>
     </nav>
     
     <!-- Hoofdgedeelte van de pagina met het inlogformulier -->
     <section class="container mt-5">
-        <h2 class="text-center">Inloggen</h2>
+        <h2 class="text-center">Inloggen</h2> <!-- Koptekst van het inlogformulier. -->
         
-        <!-- Toon foutmelding alleen als er een inlogfout is opgetreden -->
         <?php if (isset($error)): ?>
-            <p class="text-danger text-center"><?php echo $error; ?></p>
+            <p class="text-danger text-center"><?php echo $error; ?></p> 
+            <!-- Toont een foutmelding als er een inlogfout is opgetreden. -->
         <?php endif; ?>
         
-        <!-- Inlogformulier dat gegevens verstuurt naar dezelfde pagina (POST methode) -->
-        <!-- De klasse mx-auto centreert het formulier horizontaal op de pagina -->
-        <form method="POST" class="col-md-6 mx-auto">
-            <!-- Invoerveld voor e-mailadres met verplicht (required) attribuut -->
+        <form method="POST" class="col-md-6 mx-auto"> 
+            <!-- Inlogformulier dat gegevens verstuurt naar dezelfde pagina via de POST-methode. -->
             <div class="mb-3">
-                <label for="email" class="form-label">E-mail</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <label for="email" class="form-label">E-mail</label> 
+                <!-- Label voor het e-mailadres. -->
+                <input type="email" class="form-control" id="email" name="email" required> 
+                <!-- Invoerveld voor e-mailadres. Het 'required'-attribuut maakt het verplicht. -->
             </div>
             
-            <!-- Invoerveld voor wachtwoord (type="password" verbergt de ingevoerde tekst) -->
             <div class="mb-3">
-                <label for="password" class="form-label">Wachtwoord</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <label for="password" class="form-label">Wachtwoord</label> 
+                <!-- Label voor het wachtwoord. -->
+                <input type="password" class="form-control" id="password" name="password" required> 
+                <!-- Invoerveld voor wachtwoord. Het 'required'-attribuut maakt het verplicht. -->
             </div>
             
-            <!-- Inlogknop die het formulier verstuurt -->
-            <!-- w-100 maakt de knop even breed als het formulier -->
-            <button type="submit" class="btn btn-primary w-100">Inloggen</button>
+            <button type="submit" class="btn btn-primary w-100">Inloggen</button> 
+            <!-- Knop om het formulier te versturen. -->
             
-            <!-- Links naar andere pagina's voor gebruikers zonder account of met vergeten wachtwoord -->
             <p class="mt-2 text-center">
-                <a href="register.php">Account aanmaken</a> | <a href="forgot_password.php">Wachtwoord vergeten?</a>
+                <a href="register.php">Account aanmaken</a> | <a href="forgot_password.php">Wachtwoord vergeten?</a> 
+                <!-- Links naar registratie en wachtwoordherstel. -->
             </p>
         </form>
     </section>
     
     <!-- Voettekst met copyright informatie -->
     <footer class="bg-dark text-white text-center py-3 mt-5">
-        <p>© 2025 StudyMate Event Manager</p>
+        <p>© 2025 StudyMate Event Manager</p> <!-- Copyright informatie. -->
     </footer>
     
     <!-- JavaScript-bestanden voor interactiviteit -->
-    <!-- Bootstrap JS voor functionaliteit zoals dropdowns en modals -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+    <!-- Bootstrap JS voor functionaliteit zoals dropdowns en modals. -->
+    <script src="script.js"></script> <!-- Link naar eigen JavaScript-bestand. -->
 </body>
 </html>

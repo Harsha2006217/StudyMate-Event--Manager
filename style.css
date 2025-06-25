@@ -1,183 +1,173 @@
 /**
  * StudyMate Event Manager Stijlbestand
- * 
- * Dit CSS-bestand bevat alle visuele stijlen voor de StudyMate applicatie.
- * De stijlen zijn logisch georganiseerd per onderdeel voor een duidelijke structuur.
+ * Dit bestand bevat alle visuele stijlen voor de applicatie.
+ * De commentaar legt uit wat elke regel doet, zodat het begrijpelijk is.
  */
 
-/* Basisstijlen voor de hele webpagina - zorgt voor een consistente look and feel */
+/* Basisstijl voor de hele pagina */
 body {
-    font-family: Arial, sans-serif;    /* Keuze voor Arial lettertype zorgt voor optimale leesbaarheid op alle apparaten */
-    background-color: #f4f4f4;         /* Lichtgrijze achtergrondkleur voor een rustige, professionele uitstraling */
-    margin: 0;                         /* Verwijdert de standaard witruimte rond de pagina zodat inhoud de volledige ruimte benut */
-    padding: 0;                        /* Geen interne opvulling voor een strak design */
-    min-height: 100vh;                 /* Zorgt dat de inhoud altijd minstens de volledige schermbreedte vult, voorkomt korte pagina's */
+    font-family: Arial, sans-serif; /* Lettertype voor leesbaarheid */
+    background-color: #f4f4f4; /* Rustige lichtgrijze achtergrondkleur */
+    margin: 0; /* Verwijdert standaard witruimte rond de pagina */
+    padding: 0; /* Geen interne opvulling */
+    min-height: 100vh; /* Zorgt dat de pagina altijd de volledige schermhoogte vult */
 }
 
-/* Navigatiebalk bovenaan de pagina - eerste visuele element dat gebruikers zien */
+/* Navigatiebalk */
 .navbar-brand {
-    font-size: 1.5rem;                /* Vergroot lettertype van het logo/merknaam voor goede zichtbaarheid */
-    font-weight: bold;                /* Vetgedrukte tekst om het logo duidelijker te maken en te benadrukken */
-    color: #fff;                      /* Witte tekstkleur voor maximaal contrast met donkere navigatiebalk */
+    font-size: 1.5rem; /* Groot lettertype voor merknaam */
+    font-weight: bold; /* Vetgedrukt voor nadruk */
+    color: #fff; /* Witte tekst voor contrast */
 }
 
 .navbar-nav .nav-link.active {
-    color: #28a745;                   /* Groene highlight voor de actieve pagina helpt bij oriëntatie voor gebruikers */
+    color: #28a745; /* Groene kleur voor actieve pagina */
 }
 
-/* Vaste footer onderaan elke pagina - bevat copyright en contactinformatie */
+/* Footer onderaan de pagina */
 footer {
-    position: fixed;                  /* Footer blijft altijd zichtbaar onderaan het scherm, ook bij scrollen */
-    bottom: 0;                        /* Positioneert de footer exact aan de onderkant van het browservenster */
-    width: 100%;                      /* Footer strekt zich uit over de volledige breedte van het scherm */
-    background-color: #343a40;        /* Donkere achtergrond, passend bij het kleurenschema van de navigatiebalk */
-    color: #fff;                      /* Witte tekst voor leesbaarheid tegen de donkere achtergrond */
-    padding: 1rem 0;                  /* Voldoende ruimte boven en onder de tekst voor een prettige visuele ervaring */
-    text-align: center;               /* Centrering van de tekst in de footer voor een gebalanceerde layout */
+    position: fixed; /* Blijft altijd onderaan zichtbaar */
+    bottom: 0; /* Exact aan de onderkant van het scherm */
+    width: 100%; /* Volledige breedte van het scherm */
+    background-color: #343a40; /* Donkere achtergrondkleur */
+    color: #fff; /* Witte tekst voor leesbaarheid */
+    padding: 1rem 0; /* Ruimte boven en onder de tekst */
+    text-align: center; /* Tekst gecentreerd */
 }
 
-/* Hoofdinhoud van de pagina - waar belangrijke informatie wordt getoond */
+/* Hoofdinhoud van de pagina */
 section {
-    padding-bottom: 80px;             /* Extra ruimte toegevoegd onder de inhoud zodat deze niet door de footer wordt verborgen */
+    padding-bottom: 80px; /* Voorkomt dat inhoud overlapt met de footer */
+    animation: fadeIn 0.5s ease-in; /* Vloeiende animatie bij laden */
 }
 
-/* Evenementen in de kalenderweergave - visuele representatie van geplande activiteiten */
+/* Animatie definitie */
+@keyframes fadeIn {
+    from {
+        opacity: 0; /* Start volledig transparant */
+        transform: translateY(15px); /* Start iets lager */
+    }
+    to {
+        opacity: 1; /* Volledig zichtbaar */
+        transform: translateY(0); /* Normale positie */
+    }
+}
+
+/* Evenementen styling */
 .event {
-    padding: 6px 12px;                /* Voldoende interne ruimte zodat de tekst niet tegen de randen komt */
-    margin: 5px 0;                    /* Verticale ruimte tussen evenementen voor duidelijke scheiding */
-    border-radius: 4px;               /* Afgeronde hoeken voor een modernere en zachtere uitstraling */
-    color: white;                     /* Witte tekst voor goede leesbaarheid op gekleurde achtergronden */
-    font-size: 0.9rem;                /* Iets kleinere tekstgrootte voor evenementen past beter in kalenderblokken */
-    transition: transform 0.2s ease;   /* Vloeiende overgangsanimatie wanneer gebruiker over een evenement zweeft */
+    padding: 6px 12px; /* Ruimte binnen het evenementblok */
+    margin: 5px 0; /* Verticale ruimte tussen evenementen */
+    border-radius: 4px; /* Afgeronde hoeken voor een moderne uitstraling */
+    color: white; /* Witte tekst voor contrast */
+    font-size: 0.9rem; /* Kleinere tekst voor compactheid */
+    transition: transform 0.2s ease; /* Animatie bij hover */
 }
 
-/* Hover-effect voor evenementen - verbetert interactiviteit en gebruikerservaring */
 .event:hover {
-    transform: scale(1.03);           /* Subtiele vergroting van evenementen bij muisovergang voor betere gebruikersinteractie */
+    transform: scale(1.03); /* Subtiele vergroting bij hover */
 }
 
-/* Kleurcategorieën voor verschillende soorten evenementen - visuele indicatie van evenementtype */
-.school { background-color: #dc3545; } /* Rode kleur voor school-gerelateerde evenementen - urgent/belangrijk */
-.sociaal { background-color: #28a745; } /* Groene kleur voor sociale evenementen - ontspanning/vrijetijd */
-.gaming { background-color: #007bff; } /* Blauwe kleur voor gaming evenementen - technologie/entertainment */
+/* Kleuren voor verschillende evenementtypes */
+.school {
+    background-color: #dc3545; /* Rode kleur voor schoolevenementen */
+}
 
-/* Formuliersectie voor het toevoegen van nieuwe evenementen - kernfunctionaliteit van de applicatie */
+.sociaal {
+    background-color: #28a745; /* Groene kleur voor sociale evenementen */
+}
+
+.gaming {
+    background-color: #007bff; /* Blauwe kleur voor gaming evenementen */
+}
+
+/* Formulier voor het toevoegen van evenementen */
 .add-event {
-    max-width: 600px;                 /* Beperkt de breedte van het formulier voor betere leesbaarheid en focus */
-    margin: 0 auto;                   /* Centreert het formulier horizontaal op de pagina */
+    max-width: 600px; /* Beperkt de breedte voor leesbaarheid */
+    margin: 0 auto; /* Centreert het formulier */
 }
 
 .add-event h2 {
-    color: #28a745;                   /* Groene titel voor visuele consistentie met andere elementen in de applicatie */
-    font-weight: bold;                /* Vetgedrukte tekst voor de titel zorgt voor duidelijke hiërarchie */
-    margin-bottom: 1.5rem;            /* Extra ruimte onder de titel voor visuele scheiding van het formulier */
+    color: #28a745; /* Groene kleur voor consistentie */
+    font-weight: bold; /* Vetgedrukt voor nadruk */
+    margin-bottom: 1.5rem; /* Ruimte onder de titel */
 }
 
-/* Styling voor het formulier zelf - verhoogde gebruikersvriendelijkheid */
 .add-event form {
-    background-color: #fff;           /* Witte achtergrond voor het formulier zorgt voor contrast met de pagina-achtergrond */
-    padding: 25px;                    /* Ruime interne opvulling geeft formulierelementen voldoende ademruimte */
-    border-radius: 8px;               /* Afgeronde hoeken voor het formulierblok passen bij moderne UI-normen */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtiele schaduw geeft diepte en laat het formulier uitspringen */
+    background-color: #fff; /* Witte achtergrond voor contrast */
+    padding: 25px; /* Ruimte binnen het formulier */
+    border-radius: 8px; /* Afgeronde hoeken */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtiele schaduw voor diepte */
 }
 
-/* Labels voor formuliervelden - duidelijke identificatie van invoervelden */
 .add-event .form-label {
-    font-weight: 500;                 /* Semi-vetgedrukte tekst voor labels zorgt voor betere leesbaarheid */
-    color: #333;                      /* Donkergrijze kleur voor labels geeft goede leesbaarheid zonder te hard te zijn */
+    font-weight: 500; /* Semi-vetgedrukt voor leesbaarheid */
+    color: #333; /* Donkergrijze kleur voor tekst */
 }
 
-/* Styling voor invoervelden en dropdowns - uniforme look voor alle interactieve elementen */
 .add-event .form-control,
 .add-event .form-select {
-    border: 1px solid #ced4da;        /* Lichtgrijze randen rond invoervelden bieden subtiele afbakening */
-    border-radius: 5px;               /* Afgeronde hoeken voor invoervelden passen bij het formulierblok */
-    padding: 8px;                     /* Voldoende interne ruimte maakt tekstinvoer comfortabeler */
-    transition: border-color 0.3s ease; /* Vloeiende overgang bij focus-verandering verbetert gebruikerservaring */
+    border: 1px solid #ced4da; /* Lichtgrijze rand */
+    border-radius: 5px; /* Afgeronde hoeken */
+    padding: 8px; /* Ruimte binnen het veld */
+    transition: border-color 0.3s ease; /* Animatie bij focus */
 }
 
-/* Focus-status voor invoervelden - visuele feedback bij interactie */
 .add-event .form-control:focus,
 .add-event .form-select:focus {
-    border-color: #28a745;            /* Groene rand bij focus past bij het kleurenschema van de applicatie */
-    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Subtiele groene gloed versterkt focus-indicatie */
-    outline: none;                    /* Verwijdert standaard browser-outline voor een eigen styling */
+    border-color: #28a745; /* Groene rand bij focus */
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Groene gloed bij focus */
+    outline: none; /* Verwijdert standaard browser-outline */
 }
 
-/* Opslaan-knop styling - primaire actie in het formulier */
+/* Knoppen styling */
 .add-event .btn-success {
-    background-color: #28a745;        /* Groene knop voor de primaire actie (opslaan) voor duidelijke visuele hiërarchie */
-    border-color: #28a745;            /* Randkleur past bij de achtergrond voor een uniform uiterlijk */
-    font-weight: bold;                /* Vetgedrukte tekst benadrukt het belang van deze knop */
-    padding: 10px;                    /* Ruimere opvulling maakt de knop groter en beter klikbaar */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Vloeiende overgang voor kleur en grootte bij hover */
+    background-color: #28a745; /* Groene kleur voor opslaan-knop */
+    border-color: #28a745; /* Randkleur consistent met achtergrond */
+    font-weight: bold; /* Vetgedrukt voor nadruk */
+    padding: 10px; /* Ruimte binnen de knop */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Animatie bij hover */
 }
 
-/* Hover-effect voor opslaan-knop - interactieve feedback */
 .add-event .btn-success:hover {
-    background-color: #218838;        /* Donkerder groene kleur bij hover voor duidelijke visuele feedback */
-    border-color: #1e7e34;            /* Aangepaste randkleur past bij de donkerdere achtergrond */
-    transform: scale(1.02);           /* Subtiele vergroting bij hover versterkt het interactieve gevoel */
+    background-color: #218838; /* Donkerder groen bij hover */
+    border-color: #1e7e34; /* Aangepaste randkleur */
+    transform: scale(1.02); /* Subtiele vergroting bij hover */
 }
 
-/* Annuleren-knop styling - secundaire actie in het formulier */
 .add-event .btn-secondary {
-    background-color: #6c757d;        /* Grijze kleur voor secundaire acties, minder opvallend dan primaire knoppen */
-    border-color: #6c757d;            /* Randkleur past bij de achtergrond voor een uniform uiterlijk */
-    padding: 10px;                    /* Consistente opvulling met andere knoppen voor visuele balans */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Vloeiende overgang voor kleur en grootte bij hover */
+    background-color: #6c757d; /* Grijze kleur voor annuleren-knop */
+    border-color: #6c757d; /* Randkleur consistent met achtergrond */
+    padding: 10px; /* Ruimte binnen de knop */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Animatie bij hover */
 }
 
-/* Hover-effect voor annuleren-knop - interactieve feedback */
 .add-event .btn-secondary:hover {
-    background-color: #5a6268;        /* Donkerder grijze kleur bij hover voor duidelijke visuele feedback */
-    border-color: #545b62;            /* Aangepaste randkleur past bij de donkerdere achtergrond */
-    transform: scale(1.02);           /* Subtiele vergroting bij hover versterkt het interactieve gevoel */
+    background-color: #5a6268; /* Donkerder grijs bij hover */
+    border-color: #545b62; /* Aangepaste randkleur */
+    transform: scale(1.02); /* Subtiele vergroting bij hover */
 }
 
-/* Notificatie-items in lijsten - visuele weergave van systeemmeldingen */
-.list-group-item {
-    border-left: 4px solid #28a745;   /* Groene accent-streep links van notificaties benadrukt en categoriseert ze */
-}
-
-/* Animatie voor pagina-elementen - verbeterde gebruikerservaring bij laden */
-section {
-    animation: fadeIn 0.5s ease-in;   /* Vloeiend inkomeffect wanneer secties worden geladen voor een dynamischer gevoel */
-}
-
-/* Definitie van de inkomanimatie - bepaalt hoe elementen verschijnen */
-@keyframes fadeIn {
-    from { 
-        opacity: 0;                   /* Begint volledig transparant zodat elementen kunnen "invloeien" */
-        transform: translateY(15px);  /* Start 15px lager dan eindpositie voor een subtiel omhoogkomend effect */
-    }
-    to { 
-        opacity: 1;                   /* Eindigt volledig zichtbaar voor normale weergave */
-        transform: translateY(0);     /* Eindigt op de normale positie zonder verschuiving */
-    }
-}
-
-/* Responsieve aanpassingen voor mobiele apparaten - zorgt voor goede weergave op kleine schermen */
+/* Responsieve aanpassingen voor mobiele apparaten */
 @media (max-width: 768px) {
-    .navbar-brand { 
-        font-size: 1.25rem;           /* Kleinere merknaam op mobiele apparaten voor betere ruimtebenutting */
+    .navbar-brand {
+        font-size: 1.25rem; /* Kleinere merknaam op kleine schermen */
     }
-    
-    .add-event { 
-        max-width: 100%;              /* Formulier gebruikt volledige schermbreedte op mobiele apparaten */
-        padding: 0 15px;              /* Horizontale ruimte aan de zijkanten voorkomt dat inhoud tegen de rand komt */
+
+    .add-event {
+        max-width: 100%; /* Formulier gebruikt volledige breedte */
+        padding: 0 15px; /* Ruimte aan de zijkanten */
     }
-    
-    .add-event form { 
-        padding: 15px;                /* Minder interne ruimte in het formulier op kleine schermen bespaart ruimte */
+
+    .add-event form {
+        padding: 15px; /* Minder ruimte binnen het formulier */
     }
-    
-    .event { 
-        font-size: 0.85rem;           /* Kleinere tekst in evenementblokken past beter op mobiele schermen */
-        padding: 4px 8px;             /* Minder opvulling in evenementblokken bespaart ruimte op kleine schermen */
+
+    .event {
+        font-size: 0.85rem; /* Kleinere tekst voor evenementen */
+        padding: 4px 8px; /* Minder ruimte binnen evenementblokken */
     }
-    
-    footer { 
-        font-size: 0.9rem;            /* Kleinere tekst in de footer op mobiele apparaten voor betere leesbaarheid */
+
+    footer {
+        font-size: 0.9rem; /* Kleinere tekst in de footer */
     }
 }
