@@ -2,86 +2,103 @@
 /**
  * Pagina: Evenement toevoegen
  * 
- * Dit PHP-bestand zorgt ervoor dat een ingelogde gebruiker een nieuw evenement kan toevoegen aan het StudyMate Event Manager systeem.
- * De gebruiker kan een titel, datum, tijd, categorie en eventueel een herinnering instellen.
- * Alle invoer wordt gecontroleerd en veilig opgeslagen in de database.
+ * Dit bestand maakt het mogelijk voor ingelogde gebruikers om een nieuw evenement toe te voegen.
+ * 
+ * Functionaliteiten:
+ * - Formulier voor het toevoegen van een nieuw evenement
+ * - Validatie van alle ingevoerde gegevens
+ * - Opslaan van het evenement in de database
+ * - Doorsturen naar dashboard na succesvol toevoegen
  */
 
-// Laad de functies uit het bestand 'functions.php' zodat we deze kunnen gebruiken op deze pagina
+// Importeren van het functions.php bestand dat algemene functies bevat
+// zoals inlogcontrole, databaseverbinding, en beveiligingsfuncties
 require_once 'functions.php';
 
-// Controleer of de gebruiker is ingelogd. Als de gebruiker niet is ingelogd, wordt hij/zij doorgestuurd naar de loginpagina.
-// Dit voorkomt dat niet-gemachtigde personen evenementen kunnen toevoegen.
-requireLogin(); // Functie die controleert of de gebruiker is ingelogd
+// Controleer of de gebruiker is ingelogd
+// Als de gebruiker niet is ingelogd, wordt hij/zij doorgestuurd naar de loginpagina
+// Dit is een beveiligingsmaatregel om te voorkomen dat ongeautoriseerde gebruikers evenementen kunnen toevoegen
+requireLogin(); 
 
-// Definieer de categorieën waaruit de gebruiker kan kiezen bij het aanmaken van een evenement.
-// De array bevat de interne waarde (key) en de zichtbare naam (value) voor elke categorie.
+// Definieer de categorieën waaruit de gebruiker kan kiezen
+// Dit is een associatieve array met de interne waarde (key) en de zichtbare naam (value) voor elke categorie
+// Deze array wordt later gebruikt om automatisch de opties in het dropdown-menu te genereren
 $categories = [
-    'school' => 'School',    // Categorie voor schoolgerelateerde evenementen
-    'sociaal' => 'Sociaal',  // Categorie voor sociale evenementen
-    'gaming' => 'Gaming'     // Categorie voor gaming evenementen
+    'school' => 'School',    // Voor schoolgerelateerde evenementen zoals lessen, tentamens en opdrachten
+    'sociaal' => 'Sociaal',  // Voor sociale activiteiten zoals feestjes, afspraken en bijeenkomsten
+    'gaming' => 'Gaming'     // Voor gaming-gerelateerde evenementen zoals toernooien of speelsessies
 ];
 
-// Controleer of het formulier is verzonden via een POST-verzoek (dus als de gebruiker op 'Opslaan' heeft geklikt)
+// Controleer of het formulier is verzonden (wanneer de gebruiker op 'Opslaan' heeft geklikt)
+// We gebruiken $_SERVER['REQUEST_METHOD'] om te controleren of de pagina via een POST-verzoek is geladen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Haal de ingevulde titel op uit het formulier en maak deze veilig tegen XSS-aanvallen
-    $title = sanitizeInput($_POST['title']); // Functie die ongewenste HTML of scripts uit de invoer haalt
+    // Haal de titel op uit het formulier en verwijder ongewenste tekens
+    // De sanitizeInput functie beschermt tegen XSS-aanvallen door HTML-tags te verwijderen
+    $title = sanitizeInput($_POST['title']);
 
-    // Haal de ingevulde datum, tijd en categorie op uit het formulier
-    $date = $_POST['date'];         // Datum van het evenement
-    $time = $_POST['time'];         // Tijd van het evenement
-    $category = $_POST['category']; // Gekozen categorie
+    // Haal de overige gegevens op uit het formulier
+    // Deze waarden worden rechtstreeks uit de POST-array gehaald
+    $date = $_POST['date'];         // De gekozen datum in formaat JJJJ-MM-DD
+    $time = $_POST['time'];         // De gekozen tijd in formaat UU:MM
+    $category = $_POST['category']; // De geselecteerde categorie uit de dropdown
 
-    // Controleer of de gebruiker een herinnering heeft aangevinkt
-    // Als de checkbox is aangevinkt, krijgt $reminder de waarde 1 (waar), anders 0 (niet waar)
+    // Bepaal of een herinnering is ingesteld
+    // Als de checkbox is aangevinkt, wordt $reminder 1 (true), anders 0 (false)
+    // De isset-functie controleert of de 'reminder'-key bestaat in de POST-array
     $reminder = isset($_POST['reminder']) ? 1 : 0;
 
-    // Als er een herinnering is ingesteld, haal dan de gekozen herinneringstijd op, anders zet op null
+    // Haal de herinneringstijd op als een herinnering is ingesteld, anders zet op null
+    // Deze voorwaardelijke toewijzing (ternary operator) controleert of reminder true is
+    // Als dat zo is, wordt de herinneringstijd opgehaald, anders wordt null toegewezen
     $reminder_time = $reminder ? $_POST['reminder_time'] : null;
 
-    // Valideer de ingevulde gegevens voordat ze in de database worden opgeslagen
+    // Valideer de ingevoerde gegevens voordat ze worden opgeslagen
+    // Deze controles zorgen ervoor dat alleen geldige gegevens in de database komen
     if (empty($title)) {
         // Controleer of de titel niet leeg is
+        // Als de titel leeg is, krijgt de gebruiker een foutmelding
         $error = "Titel is verplicht.";
     } elseif (strtotime($date) < strtotime(date('Y-m-d'))) {
         // Controleer of de gekozen datum niet in het verleden ligt
+        // Vergelijkt de ingevoerde datum met de huidige datum
         $error = "Datum mag niet in het verleden liggen.";
     } elseif (!array_key_exists($category, $categories)) {
         // Controleer of de gekozen categorie bestaat in de lijst met toegestane categorieën
+        // Dit voorkomt dat iemand een ongeldige categorie probeert in te voeren via formuliermanipulatie
         $error = "Ongeldige categorie.";
     } else {
-        // Als alle validaties goed zijn, voeg het evenement toe aan de database
+        // Als alle validaties succesvol zijn, voeg het evenement toe aan de database
 
-        // Bereid een SQL-query voor om het evenement veilig in de database te plaatsen
-        // Gebruik prepared statements om SQL-injectie te voorkomen
+        // Bereid een SQL-statement voor met placeholders om SQL-injectie te voorkomen
+        // De vraagtekens zijn placeholders die later worden vervangen door echte waarden
         $stmt = $pdo->prepare(
             "INSERT INTO events (user_id, title, date, time, category, reminder, reminder_time) VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
 
-        // Voer de query uit met de juiste waarden:
-        // - user_id: het ID van de ingelogde gebruiker (uit de sessie)
-        // - title: de ingevoerde titel
-        // - date: de gekozen datum
-        // - time: de gekozen tijd
-        // - category: de gekozen categorie
-        // - reminder: of er een herinnering is ingesteld (1 of 0)
-        // - reminder_time: de gekozen herinneringstijd of null
+        // Voer het SQL-statement uit met de waarden uit het formulier
+        // De execute-methode vervangt de placeholders (?) met de waarden in de array
+        // Dit is een veilige manier om gegevens in de database op te slaan
         $stmt->execute([
-            $_SESSION['user_id'],
-            $title,
-            $date,
-            $time,
-            $category,
-            $reminder,
-            $reminder_time
+            $_SESSION['user_id'], // ID van de ingelogde gebruiker (uit de sessie)
+            $title,               // Titel van het evenement
+            $date,                // Datum van het evenement
+            $time,                // Tijd van het evenement
+            $category,            // Categorie van het evenement
+            $reminder,            // Of er een herinnering is ingesteld (1 of 0)
+            $reminder_time        // Wanneer de herinnering moet worden verzonden
         ]);
 
-        // Zet een succesmelding in de sessie zodat deze op het dashboard getoond kan worden
+        // Sla een succesmelding op in de sessie voor weergave op het dashboard
+        // Dit geeft de gebruiker feedback dat het evenement succesvol is toegevoegd
         setFlashMessage('success', "Evenement '$title' succesvol toegevoegd!");
 
-        // Stuur de gebruiker terug naar het dashboard na het toevoegen van het evenement
+        // Stuur de gebruiker door naar het dashboard
+        // De header-functie stuurt een HTTP-header om door te verwijzen naar een andere pagina
         header("Location: dashboard.php");
-        exit(); // Stop verdere uitvoering van de code
+        
+        // Stop de verdere uitvoering van de code
+        // Dit voorkomt dat er nog code wordt uitgevoerd nadat de gebruiker is doorgestuurd
+        exit();
     }
 }
 ?>
@@ -89,26 +106,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="nl">
 <head>
     <!--
-        Het <head>-gedeelte bevat informatie over de pagina:
-        - De tekencodering (UTF-8) zorgt ervoor dat alle tekens correct worden weergegeven.
-        - De viewport-instelling zorgt ervoor dat de pagina goed schaalt op mobiele apparaten.
-        - De titel wordt getoond in het tabblad van de browser.
-        - CSS-bestanden worden geladen voor de opmaak van de pagina.
-        - Bootstrap wordt gebruikt voor een moderne en responsieve vormgeving.
+        Het <head> element bevat meta-informatie over de webpagina:
+        - charset="UTF-8": Zorgt voor correcte weergave van speciale tekens en accenten
+        - viewport: Zorgt voor goede weergave op verschillende schermformaten (responsiveness)
+        - title: Verschijnt in het tabblad van de browser
+        - CSS-bestanden: Voor de opmaak van de pagina (eigen CSS en Bootstrap-framework)
     -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyMate - Evenement toevoegen</title>
-    <link rel="stylesheet" href="style.css"> <!-- Eigen CSS-bestand voor extra styling -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="style.css"> <!-- Eigen CSS-bestand voor specifieke styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> <!-- Bootstrap CSS-framework -->
 </head>
 <body>
     <!--
-        Navigatiebalk bovenaan de pagina:
-        - Bevat de naam van de website (StudyMate).
-        - Links naar andere pagina's: Home, Evenement toevoegen, Kalender, Uitloggen.
-        - De actieve pagina (Evenement toevoegen) wordt gemarkeerd.
-        - De navigatie is responsief en werkt ook op mobiele apparaten.
+        De navigatiebalk bovenaan de pagina:
+        - navbar-dark bg-dark: Donkere kleurstelling
+        - container: Houdt de inhoud gecentreerd en responsief
+        - navbar-brand: Logo of naam van de website (StudyMate)
+        - navbar-toggler: Hamburger-menu voor mobiele weergave
+        - navbar-nav: De lijst met navigatie-items
+        - active: Markeert de huidige pagina in het menu
     -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -128,17 +146,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </nav>
 
     <!--
-        Hoofdsectie van de pagina:
-        - Hier staat het formulier waarmee de gebruiker een nieuw evenement kan toevoegen.
-        - Het formulier bevat velden voor titel, datum, tijd, categorie, herinnering en herinneringstijd.
-        - Eventuele foutmeldingen worden boven het formulier getoond.
+        Hoofdsectie met het formulier:
+        - container: Houdt de inhoud gecentreerd en responsief
+        - mt-5: Margin top (ruimte bovenaan) van formaat 5
+        - add-event: Eigen CSS-klasse voor eventuele specifieke styling
+        - h2 text-center: Gecentreerde hoofdtitel
     -->
     <section class="container mt-5 add-event">
         <h2 class="text-center">Evenement toevoegen</h2>
 
         <!--
-            Als er een foutmelding is (bijvoorbeeld een verplicht veld is niet ingevuld),
-            wordt deze hier getoond in rode tekst, gecentreerd op de pagina.
+            Foutmelding weergave (indien aanwezig):
+            - Toont alleen als er een fout is opgetreden bij het valideren van het formulier
+            - text-danger: Rode tekstkleur voor de foutmelding
+            - text-center: Gecentreerde tekst
         -->
         <?php if (isset($error)): ?>
             <p class="text-danger text-center"><?php echo $error; ?></p>
@@ -146,14 +167,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!--
             Het formulier voor het toevoegen van een evenement:
-            - Methode: POST (gegevens worden veilig verzonden)
-            - Bootstrap-klassen zorgen voor een mooie opmaak en centrering
+            - method="POST": Verzendt formuliergegevens veilig en niet zichtbaar in de URL
+            - col-md-6 mx-auto: Maakt het formulier half zo breed als de container op medium schermen en centreert het
+            - Alle velden hebben labels voor toegankelijkheid en gebruiksvriendelijkheid
         -->
         <form method="POST" class="col-md-6 mx-auto">
             <!--
-                Invoerveld voor de titel van het evenement:
-                - 'required' zorgt ervoor dat het veld niet leeg mag zijn.
-                - De waarde blijft staan als het formulier opnieuw wordt getoond na een fout.
+                Titel invoerveld:
+                - mb-3: Margin bottom (ruimte onderaan) van formaat 3
+                - form-label: Bootstrap-stijl voor het label
+                - form-control: Bootstrap-stijl voor het invoerveld
+                - required: Veld moet worden ingevuld
+                - value="...": Behoudt de ingevoerde waarde als het formulier opnieuw wordt geladen na een fout
+                - htmlspecialchars: Voorkomt XSS-aanvallen door speciale tekens om te zetten
             -->
             <div class="mb-3">
                 <label for="title" class="form-label">Titel</label>
@@ -161,9 +187,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <!--
-                Invoerveld voor de datum van het evenement:
-                - 'type="date"' zorgt voor een datumkiezer.
-                - 'required' maakt het veld verplicht.
+                Datum invoerveld:
+                - type="date": Toont een datumkiezer in ondersteunde browsers
+                - required: Veld moet worden ingevuld
             -->
             <div class="mb-3">
                 <label for="date" class="form-label">Datum</label>
@@ -171,9 +197,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <!--
-                Invoerveld voor de tijd van het evenement:
-                - 'type="time"' zorgt voor een tijdkiezer.
-                - 'required' maakt het veld verplicht.
+                Tijd invoerveld:
+                - type="time": Toont een tijdkiezer in ondersteunde browsers
+                - required: Veld moet worden ingevuld
             -->
             <div class="mb-3">
                 <label for="time" class="form-label">Tijd</label>
@@ -181,9 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <!--
-                Dropdownmenu voor het kiezen van een categorie:
-                - De opties worden automatisch gegenereerd uit de $categories-array.
-                - 'required' maakt het veld verplicht.
+                Categorie keuzemenu:
+                - form-select: Bootstrap-stijl voor een dropdown-menu
+                - required: Er moet een optie worden geselecteerd
+                - De opties worden dynamisch gegenereerd uit de $categories array
+                - De foreach-lus loopt door elke categorie en maakt een option-element
             -->
             <div class="mb-3">
                 <label for="category" class="form-label">Categorie</label>
@@ -195,8 +223,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <!--
-                Checkbox voor het instellen van een herinnering:
-                - Als deze is aangevinkt, kan de gebruiker een herinneringstijd kiezen.
+                Herinnering checkbox:
+                - form-check: Bootstrap-stijl voor een checkbox
+                - form-check-input: Stijl voor het vinkje zelf
+                - form-check-label: Stijl voor het label naast het vinkje
+                - Als deze checkbox wordt aangevinkt, wordt het reminder_time veld gebruikt
             -->
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="reminder" name="reminder">
@@ -204,9 +235,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <!--
-                Dropdownmenu voor het kiezen van de herinneringstijd:
-                - Wordt alleen gebruikt als de herinnering is aangevinkt.
-                - De opties geven aan hoeveel tijd van tevoren de herinnering wordt gestuurd.
+                Herinneringstijd keuzemenu:
+                - Wordt gebruikt als de gebruiker een herinnering wil instellen
+                - Bevat vooraf gedefinieerde tijdsopties (5 min, 30 min, 1 uur voor het evenement)
+                - Het JavaScript in script.js zorgt ervoor dat dit veld alleen actief is als de checkbox is aangevinkt
             -->
             <div class="mb-3">
                 <label for="reminder_time" class="form-label">Herinneringstijd</label>
@@ -219,28 +251,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!--
                 Opslaan-knop:
-                - Hiermee wordt het formulier verzonden en het evenement toegevoegd.
-                - 'btn-success' geeft de knop een groene kleur.
-                - 'w-100' zorgt ervoor dat de knop de volledige breedte van het formulier inneemt.
+                - btn btn-success: Groene knop in Bootstrap-stijl
+                - w-100: Volledige breedte (width 100%)
+                - type="submit": Verstuurt het formulier wanneer erop geklikt wordt
             -->
             <button type="submit" class="btn btn-success w-100">Opslaan</button>
 
             <!--
                 Terugknop:
-                - Ziet eruit als een knop, maar is een link naar het dashboard.
-                - 'btn-secondary' geeft de knop een grijze kleur.
-                - 'mt-2' voegt extra ruimte toe boven de knop.
+                - btn btn-secondary: Grijze knop in Bootstrap-stijl
+                - w-100: Volledige breedte
+                - mt-2: Margin top van formaat 2 (ruimte boven de knop)
+                - Dit is een link die teruggaat naar het dashboard, opgemaakt als een knop
             -->
             <a href="dashboard.php" class="btn btn-secondary w-100 mt-2">Terug naar overzicht</a>
         </form>
     </section>
 
     <!--
-        Voettekst onderaan de pagina:
-        - Donkere achtergrond met witte tekst.
-        - Gecentreerde tekst met copyright-informatie.
-        - 'py-3' zorgt voor verticale ruimte binnen de voettekst.
-        - 'mt-5' zorgt voor extra ruimte boven de voettekst.
+        Voettekst (footer):
+        - bg-dark: Donkere achtergrond
+        - text-white: Witte tekst
+        - text-center: Gecentreerde tekst
+        - py-3: Padding (ruimte binnen het element) in y-richting (boven en onder) van formaat 3
+        - mt-5: Margin top (ruimte bovenaan) van formaat 5
+        - Bevat copyright-informatie
     -->
     <footer class="bg-dark text-white text-center py-3 mt-5">
         <p>© 2025 StudyMate Event Manager</p>
@@ -248,8 +283,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!--
         JavaScript-bestanden:
-        - Bootstrap JavaScript voor interactieve elementen zoals het uitklapbare menu.
-        - Eigen script.js-bestand voor extra functionaliteit, zoals het in- of uitschakelen van het herinneringstijd-veld.
+        - Bootstrap JavaScript voor interactieve elementen zoals het uitklapbare menu
+        - script.js voor eigen functionaliteit zoals het in-/uitschakelen van het herinneringstijd-veld
+        - Deze worden onderaan de pagina geladen zodat de pagina eerst visueel laadt
     -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
