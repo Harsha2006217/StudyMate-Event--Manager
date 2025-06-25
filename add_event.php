@@ -9,10 +9,10 @@
 
 // Laad de benodigde functies en controleer of de gebruiker is ingelogd
 require_once 'functions.php';
-requireLogin();
+requireLogin(); // Nieuwe comment: Deze functie 'requireLogin()' controleert of de gebruiker is ingelogd.
 
 // Definieer de beschikbare categorieën voor evenementen
-$categories = ['school' => 'School', 'sociaal' => 'Sociaal', 'gaming' => 'Gaming'];
+$categories = ['school' => 'School', 'sociaal' => 'Sociaal', 'gaming' => 'Gaming']; // Nieuwe comment: '$categories' bevat alle categorieën die de gebruiker kan kiezen.
 
 // Verwerk het formulier wanneer het wordt verzonden
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
